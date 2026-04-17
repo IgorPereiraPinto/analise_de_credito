@@ -1,0 +1,48 @@
+# Credenciais e variáveis de ambiente
+.env
+*.env.local
+
+# Dados sensíveis e arquivos Excel com dados reais
+data/raw/*.xlsx
+data/raw/*.csv
+data/raw/*.parquet
+data/processed/*.csv
+data/processed/*.parquet
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+dist/
+build/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDEs
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs e outputs temporários
+*.log
+logs/
+temp/
+tmp/
+
+# Arquivos Office gerados/temporários
+~$*.xlsx
+~$*.docx
+~$*.pptx

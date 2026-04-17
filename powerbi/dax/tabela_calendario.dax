@@ -1,0 +1,26 @@
+// ================================================================
+// dCalendario — Tabela calendário para credito_bba
+// Crie como "New Table" no Power BI Desktop
+// Conecte à coluna data_referencia de ratings e exposicoes
+// ================================================================
+
+dCalendario =
+VAR _inicio = DATE(2024, 1, 1)
+VAR _fim     = DATE(2026, 12, 31)
+RETURN
+ADDCOLUMNS(
+    CALENDAR(_inicio, _fim),
+    "Ano",            YEAR([Date]),
+    "Mês Num",        MONTH([Date]),
+    "Mês Nome",       FORMAT([Date], "MMM", "pt-BR"),
+    "Mês Nome Longo", FORMAT([Date], "MMMM", "pt-BR"),
+    "Ano-Mês",        FORMAT([Date], "YYYY-MM"),
+    "Ano-Mês Label",  FORMAT([Date], "MMM/YYYY", "pt-BR"),
+    "Trimestre",      "T" & ROUNDUP(MONTH([Date]) / 3, 0),
+    "Ano-Trimestre",  YEAR([Date]) & "-T" & ROUNDUP(MONTH([Date]) / 3, 0),
+    "Semestre",       IF(MONTH([Date]) <= 6, "S1", "S2"),
+    "Dia Semana Num", WEEKDAY([Date], 2),
+    "Dia Semana",     FORMAT([Date], "ddd", "pt-BR"),
+    "É Fim de Semana",IF(WEEKDAY([Date], 2) >= 6, TRUE, FALSE),
+    "Ordem Mês",      YEAR([Date]) * 100 + MONTH([Date])
+)

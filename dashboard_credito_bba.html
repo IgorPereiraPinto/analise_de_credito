@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Análise de Crédito BBA — Portfólio de clientes corporativo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --orange:#EC7000;
+  --orange-2:#FF8A00;
+  --orange-lt:#F5A04A;
+  --orange-bg:#FEF3E8;
+  --orange-soft:#FFF6ED;
+  --navy:#0D1B2A;
+  --navy-mid:#1C3450;
+  --navy-lt:#2A4A6B;
+  --gray-1:#F5F6F8;
+  --gray-2:#E8EAED;
+  --gray-3:#BFC3CA;
+  --gray-4:#6B7280;
+  --gray-5:#374151;
+  --gray-6:#1F2937;
+  --white:#FFFFFF;
+  --green:#1A7F4B;
+  --green-bg:#E8F5EE;
+  --yellow:#B45309;
+  --yellow-bg:#FEF3C7;
+  --red:#C0392B;
+  --red-bg:#FDECEA;
+  --blue-acc:#1A73B5;
+  --blue-bg:#EBF4FF;
+  --radius:10px;
+  --radius-sm:8px;
+  --shadow:0 1px 4px rgba(0,0,0,.06),0 10px 22px rgba(13,27,42,.05);
+  --shadow-strong:0 4px 14px rgba(13,27,42,.10),0 14px 34px rgba(13,27,42,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:linear-gradient(180deg,#F7F8FA 0%,#F3F5F8 100%);color:var(--gray-5);font-size:13px;overflow-x:hidden;max-width:1600px;margin:0 auto;min-height:900px;}
+body.exec-mode .tech-tag, body.exec-mode .tech-source {display:none!important}
+.header{background:radial-gradient(circle at top right,rgba(236,112,0,.18),transparent 22%),linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 6px 18px rgba(13,27,42,.22);}
+.header-left,.header-right,.logo-wrap{display:flex;align-items:center;gap:12px}
+.logo-box{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:42px;height:38px;border-radius:9px;background:linear-gradient(145deg,#EC7000,#FF8A00);box-shadow:0 3px 10px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.2);}
+.logo-divider{width:1px;height:30px;background:rgba(255,255,255,.18)}
+.header-titles{display:flex;flex-direction:column}
+.header-title{color:#fff;font-size:16px;font-weight:800;letter-spacing:-.2px;line-height:1.1}
+.header-sub{color:#D7E2EE;font-size:11px;margin-top:3px}
+.badge-ref,.header-date{border-radius:999px;padding:5px 10px;font-size:11px;display:inline-flex;align-items:center}
+.badge-ref{background:rgba(236,112,0,.14);color:#FFD9B1;border:1px solid rgba(236,112,0,.28);font-weight:600}
+.header-date{background:rgba(255,255,255,.06);color:#D7E2EE;border:1px solid rgba(255,255,255,.10)}
+.tabs-shell{padding:10px 16px 0}
+.tabs-bar{background:linear-gradient(180deg,var(--navy-mid) 0%,#183049 100%);padding:0 12px;display:flex;gap:4px;border-radius:12px 12px 0 0;border:1px solid rgba(13,27,42,.06);overflow:auto}
+.tab{padding:12px 14px;color:#B8C5D4;cursor:pointer;font-size:12px;font-weight:600;border-bottom:2px solid transparent;transition:all .18s ease;white-space:nowrap}
+.tab:hover{color:#fff}.tab.active{color:var(--orange-lt);border-bottom-color:var(--orange);background:rgba(255,255,255,.02)}
+.filter-bar{background:var(--white);margin:0 16px;padding:12px 16px;display:flex;align-items:center;gap:8px;border:1px solid var(--gray-2);border-top:none;border-radius:0 0 12px 12px;box-shadow:var(--shadow);flex-wrap:wrap}
+.filter-label{font-size:11px;font-weight:800;color:var(--gray-4);text-transform:uppercase;letter-spacing:.7px;margin-right:2px}
+.filter-select{background:var(--gray-1);border:1px solid var(--gray-2);border-radius:var(--radius-sm);padding:7px 28px 7px 10px;font-size:12px;color:var(--gray-6);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236B7280'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;cursor:pointer;font-family:inherit;transition:all .15s;min-width:160px}
+.filter-select:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px rgba(236,112,0,.10)}
+.filter-divider{width:1px;height:22px;background:var(--gray-2);margin:0 2px}
+.period-btn,.filter-reset{padding:6px 11px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.period-btn{border:1px solid var(--gray-2);background:transparent;color:var(--gray-4)}
+.period-btn.active{background:var(--navy);color:var(--white);border-color:var(--navy)}
+.period-btn:hover:not(.active){border-color:var(--orange);color:var(--orange)}
+.filter-reset{border:1px solid rgba(236,112,0,.18);background:var(--orange-soft);color:var(--orange)}
+.filter-reset:hover{background:var(--orange);color:#fff}
+.filter-count{margin-left:auto;font-size:11px;color:var(--gray-4);background:var(--gray-1);padding:5px 10px;border-radius:999px;border:1px solid var(--gray-2);font-weight:600}
+.content{padding:16px;min-height:760px}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.section-title{font-size:11px;font-weight:800;color:var(--gray-4);text-transform:uppercase;letter-spacing:.8px;margin:16px 0 10px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--gray-2)}
+.section-badge{background:var(--orange-bg);color:var(--orange);font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid rgba(236,112,0,.18);font-weight:700;text-transform:none;letter-spacing:0}
+.kpi-grid{display:grid;gap:10px;margin-bottom:4px;width:100%}
+.kpi-6{grid-template-columns:repeat(6,1fr)} .kpi-4{grid-template-columns:repeat(4,1fr)} .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%} .g3{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%} .g3b{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%}
+.kpi-card{background:linear-gradient(180deg,#fff 0%,#FCFCFD 100%);border-radius:var(--radius);padding:16px 16px 14px;box-shadow:var(--shadow);border:1px solid rgba(13,27,42,.04);border-left:4px solid var(--gray-2);position:relative;overflow:hidden;transition:transform .14s ease,box-shadow .18s ease}
+.kpi-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-strong)}
+.kpi-card::before{content:'';position:absolute;top:0;right:0;width:66px;height:66px;border-radius:50%;opacity:.06;transform:translate(20px,-18px)}
+.kpi-card.c-orange{border-left-color:var(--orange)} .kpi-card.c-orange::before{background:var(--orange)}
+.kpi-card.c-green{border-left-color:var(--green)} .kpi-card.c-green::before{background:var(--green)}
+.kpi-card.c-yellow{border-left-color:var(--yellow)} .kpi-card.c-yellow::before{background:var(--yellow)}
+.kpi-card.c-red{border-left-color:var(--red)} .kpi-card.c-red::before{background:var(--red)}
+.kpi-card.c-navy{border-left-color:var(--navy-mid)} .kpi-card.c-navy::before{background:var(--navy-mid)}
+.kpi-label{font-size:11px;font-weight:600;color:var(--gray-4);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-value{font-size:24px;font-weight:800;color:var(--gray-6);letter-spacing:-.6px;line-height:1;margin-bottom:9px}
+.kpi-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kpi-bench{font-size:10px;color:var(--gray-4);line-height:1.3}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap}
+.b-ok{background:var(--green-bg);color:var(--green)} .b-att{background:var(--yellow-bg);color:var(--yellow)} .b-crit{background:var(--red-bg);color:var(--red)} .b-info{background:var(--blue-bg);color:var(--blue-acc)}
+.card,.insight-card,.tcard,.fonte-card,.glo-card{background:linear-gradient(180deg,#FFFFFF 0%,#FCFCFD 100%);border:1px solid rgba(13,27,42,.04)}
+.card{border-radius:var(--radius);padding:15px 16px;box-shadow:var(--shadow)}
+.card-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:700;color:var(--gray-6)}
+.card-sub{font-size:11px;color:var(--gray-4);margin-top:2px;line-height:1.35}
+.card-tag{font-size:10px;padding:4px 8px;border-radius:999px;background:var(--gray-1);color:var(--gray-4);font-weight:700;border:1px solid var(--gray-2);white-space:nowrap}
+.card-tag.extra{background:var(--orange-bg);color:var(--orange);border-color:rgba(236,112,0,.22)}
+canvas{max-height:240px}.c-lg{max-height:250px}.c-sm{max-height:165px}
+.alerts{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.alert{flex:1;min-width:220px;border-radius:var(--radius);padding:12px 13px;display:flex;align-items:flex-start;gap:10px;border:1px solid transparent;border-left:4px solid;box-shadow:var(--shadow)}
+.alert.red{background:var(--red-bg);border-color:#F4C8C2;border-left-color:var(--red)}
+.alert.yellow{background:var(--yellow-bg);border-color:#F2DEA8;border-left-color:var(--yellow)}
+.alert.green{background:var(--green-bg);border-color:#CBE8D8;border-left-color:var(--green)}
+.alert.blue{background:var(--blue-bg);border-color:#D3E5FA;border-left-color:var(--blue-acc)}
+.alert-icon{font-size:16px;line-height:1;flex-shrink:0}
+.at{font-size:12px;font-weight:800;margin-bottom:3px}.ab{font-size:11px;color:var(--gray-4);line-height:1.45}
+.tcard{border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.thdr{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;border-bottom:1px solid var(--gray-2)}
+.ttitle{font-size:13px;font-weight:700;color:var(--gray-6)} .tcount{font-size:11px;color:var(--gray-4);font-weight:600}
+table{width:100%;border-collapse:collapse}
+thead tr{background:linear-gradient(180deg,var(--navy-mid) 0%,var(--navy) 100%)}
+thead th{padding:9px 11px;text-align:left;font-size:10px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.45px;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--gray-2);transition:background .1s}
+tbody tr:hover{background:#FAFBFD} tbody tr:last-child{border-bottom:none}
+tbody td{padding:9px 11px;font-size:12px;color:var(--gray-6);white-space:nowrap}
+.tb{font-weight:700}
+.tag{display:inline-block;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;text-transform:uppercase}
+.t-ok{background:var(--green-bg);color:var(--green)} .t-att{background:var(--yellow-bg);color:var(--yellow)} .t-crit{background:var(--red-bg);color:var(--red)} .t-info{background:var(--blue-bg);color:var(--blue-acc)} .t-gray{background:var(--gray-2);color:var(--gray-4)}
+.pw{display:flex;align-items:center;gap:7px}.pb{flex:1;height:6px;background:var(--gray-2);border-radius:999px;overflow:hidden;max-width:74px}.pf{height:100%;border-radius:999px}.pf-ok{background:var(--green)}.pf-att{background:var(--orange)}.pf-crit{background:var(--red)}.pv{font-size:11px;font-weight:700;width:42px}
+.dleg{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.dli{display:flex;align-items:center;justify-content:space-between;font-size:11px}.dll{display:flex;align-items:center;color:var(--gray-5)}.dld{width:9px;height:9px;border-radius:50%;margin-right:7px;flex-shrink:0}.dlv{font-weight:700;color:var(--gray-6)}
+.insight-card{border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)} .insight-card h4{font-size:13px;font-weight:800;color:var(--navy-mid);margin-bottom:8px} .insight-card p{font-size:12px;color:var(--gray-4);line-height:1.65}
+.glo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.glo-card{border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border-top:3px solid var(--orange)}
+.glo-name{font-size:13px;font-weight:800;color:var(--navy-mid);margin-bottom:4px}
+.glo-source{display:inline-flex;align-items:center;gap:4px;font-size:10px;background:var(--navy);color:var(--orange-lt);padding:3px 8px;border-radius:999px;margin-bottom:7px;font-weight:700}
+.glo-formula{font-size:11px;background:var(--gray-1);border:1px solid var(--gray-2);border-radius:8px;padding:6px 10px;margin:4px 0 8px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--gray-6);overflow:auto}
+.glo-desc,.fonte-obs{font-size:12px;color:var(--gray-4);line-height:1.6}
+.glo-bench{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}.gb{font-size:10px;padding:3px 8px;border-radius:999px;font-weight:700}.gb-ok{background:var(--green-bg);color:var(--green)} .gb-att{background:var(--yellow-bg);color:var(--yellow)} .gb-crit{background:var(--red-bg);color:var(--red)}
+.fonte-card{border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-top:12px;border-left:4px solid var(--navy-mid)}
+.fonte-title{font-size:14px;font-weight:800;color:var(--navy-mid);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.pipe{display:flex;align-items:stretch;gap:0;margin:12px 0;flex-wrap:wrap}.pipe-step{flex:1;background:var(--gray-1);border:1px solid var(--gray-2);border-radius:8px;padding:12px 13px;position:relative;min-width:190px}.pipe-step+.pipe-step::before{content:'→';position:absolute;left:-12px;top:50%;transform:translateY(-50%);color:var(--orange);font-weight:800;font-size:15px}
+.ps-title{font-size:11px;font-weight:800;color:var(--navy-mid);margin-bottom:4px}.ps-desc{font-size:11px;color:var(--gray-4);line-height:1.45}
+.nota{margin:0 16px 16px;padding:14px 16px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);border-radius:12px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 8px 18px rgba(13,27,42,.18)}
+.nota-text{font-size:11px;color:#D4DEE8;line-height:1.65}.nota-text strong{color:#FFD1A0}
+.empty-row td{text-align:center;color:var(--gray-4);font-style:italic;padding:20px}
+@media(max-width:1200px){.kpi-6,.kpi-4,.g2,.g3,.g3b,.glo-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.header{height:auto;padding:12px 16px;align-items:flex-start;gap:12px;flex-direction:column}.header-right{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="logo-wrap">
+      <div class="logo-box" aria-label="Ícone de gráfico">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 19.25H20" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M7 16V11.5" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M12 16V7.5" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M17 16V4.5" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M6.4 9.6L10.6 6.7L13.4 8.1L18.1 4.8" stroke="#FFD9B1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="6.4" cy="9.6" r="1.2" fill="#FFD9B1"/>
+          <circle cx="10.6" cy="6.7" r="1.2" fill="#FFD9B1"/>
+          <circle cx="13.4" cy="8.1" r="1.2" fill="#FFD9B1"/>
+          <circle cx="18.1" cy="4.8" r="1.2" fill="#FFD9B1"/>
+        </svg>
+      </div>
+      <div class="logo-divider"></div>
+      <div class="header-titles">
+        <div class="header-title">Análise de Crédito BBA</div>
+        <div class="header-sub">Portfólio de clientes corporativo</div>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge-ref">Referência: <span id="hdr-ref">—</span></span>
+    <span class="header-date">Atualizado em <span id="hdr-upd">—</span></span>
+  </div>
+</div>
+
+<div class="tabs-shell">
+  <div class="tabs-bar">
+    <div class="tab active" onclick="switchTab(0)">📊 Visão Geral</div>
+    <div class="tab" onclick="switchTab(1)">⚠️ Análise de Riscos</div>
+    <div class="tab" onclick="switchTab(2)">💳 Performance de Limites</div>
+    <div class="tab" onclick="switchTab(3)">🔬 Análises Adicionais</div>
+    <div class="tab" onclick="switchTab(4)">📖 Glossário</div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Filtros</span>
+  <select class="filter-select" id="flt-seg" onchange="applyFilters()">
+    <option value="">Todos os Segmentos</option>
+    <option value="Corporate">Corporate</option>
+    <option value="Middle Market">Middle Market</option>
+    <option value="Wholesale">Wholesale</option>
+  </select>
+  <select class="filter-select" id="flt-setor" onchange="applyFilters()">
+    <option value="">Todos os Setores</option>
+    <option value="Tecnologia">Tecnologia</option>
+    <option value="Saúde">Saúde</option>
+    <option value="Educação">Educação</option>
+    <option value="Construção Civil">Construção Civil</option>
+    <option value="Químico">Químico</option>
+    <option value="Mineração">Mineração</option>
+    <option value="Automotivo">Automotivo</option>
+    <option value="Agronegócio">Agronegócio</option>
+    <option value="Varejo">Varejo</option>
+    <option value="Energia">Energia</option>
+  </select>
+  <select class="filter-select" id="flt-reg" onchange="applyFilters()">
+    <option value="">Todas as Regiões</option>
+    <option value="Sudeste">Sudeste</option>
+    <option value="Sul">Sul</option>
+    <option value="Centro-Oeste">Centro-Oeste</option>
+    <option value="Norte">Norte</option>
+    <option value="Nordeste">Nordeste</option>
+  </select>
+  <div class="filter-divider"></div>
+  <button class="period-btn" data-period="3m" onclick="setPeriod('3m',this)">3M</button>
+  <button class="period-btn" data-period="6m" onclick="setPeriod('6m',this)">6M</button>
+  <button class="period-btn active" data-period="12m" onclick="setPeriod('12m',this)">12M</button>
+  <button class="period-btn" data-period="all" onclick="setPeriod('all',this)">Acumulado</button>
+  <button class="filter-reset" onclick="resetFilters()">✕ Limpar</button>
+  <span class="filter-count" id="filter-count">72 clientes · 222 operações</span>
+</div>
+
+<div class="content">
+  <div class="tab-panel active" id="panel-0">
+    <div class="section-title">KPIs Principais <span class="section-badge" id="kpi-period-label">12M</span></div>
+    <div class="kpi-grid kpi-6">
+      <div class="kpi-card c-orange"><div class="kpi-label">Exposição Total</div><div class="kpi-value" id="k-exp">R$ 9,49 Bi</div><div class="kpi-footer"><span class="kpi-bench" id="k-cli">72 clientes</span><span class="badge b-ok" id="k-exp-badge">✓ Estável</span></div></div>
+      <div class="kpi-card c-green"><div class="kpi-label">% Exposição Descoberta</div><div class="kpi-value" id="k-desc">25,0%</div><div class="kpi-footer"><span class="kpi-bench">Meta: &lt; 30%</span><span class="badge b-ok" id="k-desc-badge">✓ Na Meta</span></div></div>
+      <div class="kpi-card c-yellow"><div class="kpi-label">Score Médio</div><div class="kpi-value" id="k-score">791</div><div class="kpi-footer"><span class="kpi-bench">Meta: ≥ 800</span><span class="badge b-att" id="k-score-badge">⚠ Atenção</span></div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">PD Média</div><div class="kpi-value" id="k-pd">3,22%</div><div class="kpi-footer"><span class="kpi-bench">Meta: &lt; 1%</span><span class="badge b-crit" id="k-pd-badge">✗ Acima</span></div></div>
+      <div class="kpi-card c-red"><div class="kpi-label">Operações Vencidas</div><div class="kpi-value" id="k-venc">11</div><div class="kpi-footer"><span class="kpi-bench">Meta: 0</span><span class="badge b-crit">✗ Crítico</span></div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">Provisão Total Estimada</div><div class="kpi-value" id="k-prov-total">R$ 81,1 M</div><div class="kpi-footer"><span class="kpi-bench">PD × Exposição Descoberta</span><span class="badge b-att">⚠ Monitorar</span></div></div>
+    </div>
+
+    <div class="section-title">Provisão Necessária (PCLD) e Classificação de Risco <span class="section-badge tech-tag">camada semântica SQL</span></div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr">
+          <div><div class="card-title">Distribuição por Classificação de Risco</div><div class="card-sub" id="classif-sub">Exposição por faixa de rating — 12M</div></div>
+          <span class="card-tag tech-tag">vw_exposicao_enriquecida</span>
+        </div>
+        <canvas id="cClassifRisco" class="c-sm"></canvas>
+        <div class="dleg">
+          <div class="dli"><div class="dll"><div class="dld" style="background:#1A7F4B"></div>Grau Invest. Alto</div><div class="dlv" id="leg-classif-high">R$ 0,0 M</div></div>
+          <div class="dli"><div class="dll"><div class="dld" style="background:#EC7000"></div>Grau Invest. Baixo</div><div class="dlv" id="leg-classif-mid">R$ 0,0 M</div></div>
+          <div class="dli"><div class="dll"><div class="dld" style="background:#B45309"></div>Grau Especulativo</div><div class="dlv" id="leg-classif-spec">R$ 0,0 M</div></div>
+          <div class="dli"><div class="dll"><div class="dld" style="background:#C0392B"></div>Alto Risco</div><div class="dlv" id="leg-classif-risk">R$ 0,0 M</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">
+          <div><div class="card-title">Provisão Necessária por Segmento</div><div class="card-sub" id="prov-seg-sub">PCLD estimada: PD × Exposição Descoberta (R$ M)</div></div>
+          <span class="card-tag tech-tag">vw_kpi_risco</span>
+        </div>
+        <canvas id="cProvSegmento"></canvas>
+      </div>
+    </div>
+
+    <div class="section-title">Evolução e Distribuição</div>
+    <div class="g3">
+      <div class="card">
+        <div class="card-hdr">
+          <div><div class="card-title">Evolução do Score por Segmento</div><div class="card-sub" id="score-sub">Score médio mensal — 12 meses</div></div>
+          <span class="card-tag tech-tag" id="score-tag">vw_score_por_segmento_mes</span>
+        </div>
+        <canvas id="cScoreEvol" class="c-lg"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr">
+          <div><div class="card-title">Distribuição por Segmento</div><div class="card-sub" id="seg-dist-sub">Exposição — Fev/2026</div></div>
+          <span class="card-tag tech-tag">vw_kpi_exposicao</span>
+        </div>
+        <canvas id="cSegDonut" class="c-sm"></canvas>
+        <div class="dleg">
+          <div class="dli"><div class="dll"><div class="dld" style="background:#1C3450"></div>Corporate</div><div class="dlv" id="leg-corp">R$ 5,32 Bi</div></div>
+          <div class="dli"><div class="dll"><div class="dld" style="background:#EC7000"></div>Wholesale</div><div class="dlv" id="leg-whole">R$ 3,90 Bi</div></div>
+          <div class="dli"><div class="dll"><div class="dld" style="background:#BFC3CA"></div>Middle Market</div><div class="dlv" id="leg-mid">R$ 0,27 Bi</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Concentração Setorial</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Exposição por Setor</div><div class="card-sub" id="setor-sub">% sobre o portfólio total · limite regulatório: 15%</div></div><span class="card-tag tech-tag">vw_exposicao_por_setor</span></div>
+        <canvas id="cSetorBar"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Distribuição de Ratings</div><div class="card-sub" id="rating-dist-sub">Clientes por rating interno — 72 clientes</div></div><span class="card-tag tech-tag">vw_kpi_ratings</span></div>
+        <canvas id="cRatingDist"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-1">
+    <div id="alert-box" class="alerts"></div>
+    <div class="section-title">Matriz de Risco</div>
+    <div class="g3">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Utilização × Exposição Descoberta</div><div class="card-sub" id="scatter-sub">Monitoramento operacional e risco do case</div></div><span class="card-tag tech-tag">vw_clientes_em_atencao</span></div>
+        <canvas id="cScatter" class="c-lg"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Classificação de Risco</div><div class="card-sub" id="risk-donut-sub">Atenção operacional vs alto risco do case</div></div><span class="card-tag tech-tag">vw_clientes_em_atencao</span></div>
+        <canvas id="cRiskDonut" class="c-sm"></canvas>
+        <div class="dleg">
+          <div class="dli"><div class="dll"><div class="dld" style="background:#EC7000"></div>Atenção</div><div class="dlv" id="leg-att">24 clientes</div></div>
+          <div class="dli"><div class="dll"><div class="dld" style="background:#C0392B"></div>Alto Risco</div><div class="dlv" id="leg-high">0 clientes</div></div>
+          <div class="dli"><div class="dll"><div class="dld" style="background:#1A7F4B"></div>Normal</div><div class="dlv" id="leg-norm">48 clientes</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Clientes Prioritários</div>
+    <div class="tcard">
+      <div class="thdr"><span class="ttitle">Clientes em atenção / alto risco</span><span class="tcount" id="risk-count">24 registros</span></div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Cliente</th><th>Segmento</th><th>Setor</th><th>Região</th><th>Rating</th><th>Score</th><th>% Utilização</th><th>% Descoberta</th><th>Exp. (R$M)</th><th>Classificação</th></tr></thead>
+          <tbody id="risk-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">Migração de Rating — Monitoramento</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Direção da Migração</div><div class="card-sub" id="migracao-sub">Evolução dos clientes no período selecionado</div></div><span class="card-tag tech-tag">vw_migracao_rating</span></div>
+        <canvas id="cMigracao"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Intensidade da Migração</div><div class="card-sub" id="migracao-int-sub">Número de níveis alterados</div></div><span class="card-tag tech-tag">vw_migracao_rating</span></div>
+        <canvas id="cIntensidade"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-2">
+    <div class="section-title">KPIs de Utilização de Limites</div>
+    <div class="kpi-grid kpi-4">
+      <div class="kpi-card c-orange"><div class="kpi-label">Utilização Média — Global</div><div class="kpi-value" id="k-util">65,0%</div><div class="kpi-footer"><span class="kpi-bench">Ideal: 60–75%</span><span class="badge b-ok" id="k-util-badge">✓ Ideal</span></div></div>
+      <div class="kpi-card c-yellow"><div class="kpi-label">Clientes Acima de 80%</div><div class="kpi-value" id="k-80">16</div><div class="kpi-footer"><span class="kpi-bench">Alerta: &gt; 85%</span><span class="badge b-att">⚠ Revisão</span></div></div>
+      <div class="kpi-card c-red"><div class="kpi-label">Clientes Acima de 85%</div><div class="kpi-value" id="k-85">7</div><div class="kpi-footer"><span class="kpi-bench">Meta: 0</span><span class="badge b-crit">✗ Crítico</span></div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">Total Aprovado Ativo</div><div class="kpi-value" id="k-aprov">R$ 9,94 Bi</div><div class="kpi-footer"><span class="kpi-bench">Utilizado: <span id="k-utiliz">R$ 8,41 Bi</span></span><span class="badge b-info" id="k-aprov-badge">84,6%</span></div></div>
+    </div>
+
+    <div class="section-title">Análise de Utilização</div>
+    <div class="g3b">
+      <div class="card"><div class="card-hdr"><div><div class="card-title">Aprovado vs Utilizado por Produto</div><div class="card-sub" id="prod-sub">Operações ativas</div></div><span class="card-tag tech-tag">vw_kpi_operacoes</span></div><canvas id="cProdBar"></canvas></div>
+      <div class="card"><div class="card-hdr"><div><div class="card-title">Distribuição por Faixa de Utilização</div><div class="card-sub" id="utilhist-sub">Limite Global — clientes</div></div><span class="card-tag tech-tag">vw_kpi_limites</span></div><canvas id="cUtilHist"></canvas></div>
+      <div class="card"><div class="card-hdr"><div><div class="card-title">Top 5 Maiores Utilizadores</div><div class="card-sub" id="toputil-sub">% utilização do limite Global</div></div><span class="card-tag tech-tag">vw_clientes_em_atencao</span></div><canvas id="cTopUtil"></canvas></div>
+    </div>
+
+    <div class="section-title">Garantias e Operações Vencidas</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Qualidade do Colateral por Segmento</div><div class="card-sub" id="garantia-sub">% do valor aprovado por tipo de garantia</div></div><span class="card-tag tech-tag">vw_mix_garantias</span></div>
+        <canvas id="cGarantias" class="c-lg"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Operações Vencidas — Detalhe</div><div class="card-sub" id="venc-sub">Risco materializado por cliente</div></div><span class="card-tag tech-tag">vw_operacoes_vencidas</span></div>
+        <div style="overflow-x:auto">
+          <table style="font-size:11px">
+            <thead><tr><th>Cliente</th><th>Setor</th><th>Produto</th><th>Vl. Util. (R$M)</th><th>Dias Vcdo</th><th>Rating</th><th>PD</th><th>Prioridade</th></tr></thead>
+            <tbody id="vencidas-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-3">
+    <div class="alerts">
+      <div class="alert blue"><div class="alert-icon">🔬</div><div><div class="at">Análises adicionais aderentes ao case</div><div class="ab">Nesta versão, a aba foi reorientada para cobrir a lacuna da Questão 2.5 e incorporar o monitoramento de crise sugerido na Parte 5.1.</div></div></div>
+    </div>
+
+    <div class="section-title">Questão 2.5 — Estatística de Ratings</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Percentis de Score por Segmento</div><div class="card-sub" id="percentis-sub">P25, P50, P75 e P95</div></div><span class="card-tag tech-tag">vw_analise_estatistica</span></div>
+        <canvas id="cPercentis"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Média Móvel 3M do Score</div><div class="card-sub" id="ma3-sub">Suavização da tendência mensal</div></div><span class="card-tag tech-tag">vw_score_por_segmento_mes</span></div>
+        <canvas id="cMA3"></canvas>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-top:12px">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Volatilidade Mensal por Segmento</div><div class="card-sub" id="vol-sub">Desvio-padrão das variações mensais</div></div><span class="card-tag tech-tag">vw_analise_estatistica</span></div>
+        <canvas id="cVolatilidade"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Clientes Varejo em Monitoramento Intensivo</div><div class="card-sub" id="crise-table-sub">7 clientes · exposição setorial hipotética de R$ 2,2 bi · participação 12,9%</div></div><span class="card-tag extra">visual sugerido</span></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Cliente</th><th>Rating Atual</th><th>% Utilização</th><th>% Descoberta</th><th>Exposição (R$M)</th><th>Status</th></tr></thead>
+            <tbody id="crise-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Parte 5.1 — Monitoramento de Crise (cenário hipotético Varejo)</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Evolução do Rating — últimos 6 meses</div><div class="card-sub" id="crise-rating-sub">Visual para acompanhamento diário durante a crise</div></div><span class="card-tag extra">visual sugerido</span></div>
+        <canvas id="cCrisisRating" class="c-lg"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Impacto estimado em PCLD — cenários de haircut</div><div class="card-sub" id="crise-pcld-sub">Base, estresse moderado e estresse severo</div></div><span class="card-tag extra">visual sugerido</span></div>
+        <canvas id="cCrisisPcld"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-4">
+    <div class="section-title">Indicadores do Dashboard — o que cada KPI significa</div>
+    <div class="glo-grid">
+      <div class="glo-card"><div class="glo-name">📦 Exposição Total do Portfólio</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_exposicao</div><div class="glo-formula">SUM(exposicao_total) — último mês disponível</div><div class="glo-desc">Valor total em risco no portfólio corporativo. No recorte base 12M, o portfólio soma R$ 9,49 bi.</div><div class="glo-bench"><span class="gb gb-ok">✓ leitura estrutural do tamanho da carteira</span></div></div>
+      <div class="glo-card"><div class="glo-name">🛡️ % Exposição Descoberta</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_exposicao</div><div class="glo-formula">exposicao_descoberta ÷ exposicao_total × 100</div><div class="glo-desc">Mostra a parcela da carteira sem cobertura forte. No case, 25,0% ficou dentro da meta definida (&lt; 30%).</div><div class="glo-bench"><span class="gb gb-ok">✓ Meta: &lt; 30%</span><span class="gb gb-att">⚠ 30–35%</span><span class="gb gb-crit">✗ &gt; 40%</span></div></div>
+      <div class="glo-card"><div class="glo-name">⭐ Score Médio</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_ratings</div><div class="glo-formula">AVG(score_interno)</div><div class="glo-desc">Indicador médio de qualidade de crédito do portfólio. Permite acompanhar deterioração ou recuperação da carteira ao longo do tempo.</div><div class="glo-bench"><span class="gb gb-ok">✓ ≥ 800</span><span class="gb gb-att">⚠ 750–799</span><span class="gb gb-crit">✗ &lt; 650</span></div></div>
+      <div class="glo-card"><div class="glo-name">📉 PD Média</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_ratings</div><div class="glo-formula">AVG(pd_12m) × 100</div><div class="glo-desc">Probabilidade média de default em 12 meses. É uma referência direta para provisão e sensibilidade do portfólio.</div><div class="glo-bench"><span class="gb gb-ok">✓ &lt; 1%</span><span class="gb gb-att">⚠ 1–2%</span><span class="gb gb-crit">✗ &gt; 3%</span></div></div>
+      <div class="glo-card"><div class="glo-name">⚠️ Operações Vencidas</div><div class="glo-source tech-source">🗄️ SQL View: vw_operacoes_vencidas</div><div class="glo-formula">COUNT(*) WHERE status_operacao = 'Vencida'</div><div class="glo-desc">Mede risco materializado. O objetivo é evidenciar atrasos, priorização de cobrança e necessidade de renegociação.</div><div class="glo-bench"><span class="gb gb-ok">✓ 0</span><span class="gb gb-att">⚠ 1–5</span><span class="gb gb-crit">✗ &gt; 10</span></div></div>
+      <div class="glo-card"><div class="glo-name">💳 Utilização Média de Limites</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_limites</div><div class="glo-formula">AVG(valor_utilizado ÷ valor_limite) — base tratada</div><div class="glo-desc">Foi ajustada para refletir a lógica da base tratada. Nesta versão: 65,0%, preservando coerência com os demais KPIs do projeto.</div><div class="glo-bench"><span class="gb gb-ok">✓ 60–75%</span><span class="gb gb-att">⚠ 75–85%</span><span class="gb gb-crit">✗ &gt; 85%</span></div></div>
+      <div class="glo-card"><div class="glo-name">🏭 Concentração Setorial</div><div class="glo-source tech-source">🗄️ SQL View: vw_exposicao_por_setor</div><div class="glo-formula">exp_setor ÷ exp_total × 100</div><div class="glo-desc">Identifica excesso de concentração por setor frente ao limite regulatório de 15%.</div><div class="glo-bench"><span class="gb gb-ok">✓ &lt; 10%</span><span class="gb gb-att">⚠ 10–15%</span><span class="gb gb-crit">✗ &gt; 15%</span></div></div>
+      <div class="glo-card"><div class="glo-name">🚨 Clientes em Atenção / Alto Risco</div><div class="glo-source tech-source">🗄️ SQL View: vw_clientes_em_atencao</div><div class="glo-formula">Atenção operacional: util &gt; 75% OU desc &gt; 25% · Alto risco do case: util &gt; 80% E desc &gt; 30%</div><div class="glo-desc">O dashboard foi ajustado para explicitar as duas camadas: a operacional, útil no dia a dia, e a regra estrita do case para aderência ao enunciado.</div><div class="glo-bench"><span class="gb gb-att">⚠ monitoramento operacional</span><span class="gb gb-crit">✗ regra crítica do case</span></div></div>
+    </div>
+
+    <div class="fonte-card">
+      <div class="fonte-title">🗄️ Fonte de Dados e Pipeline Analítico</div>
+      <p style="font-size:12px;color:var(--gray-4);line-height:1.65;margin-bottom:12px;">Os dados partiram de um arquivo Excel (.xlsx), foram tratados em ambiente SQL Server para validação e depois convertidos para Amazon Athena como arquitetura-alvo. O HTML segue como wireframe navegável do QuickSight.</p>
+      <div class="pipe">
+        <div class="pipe-step"><div class="ps-title">1. Excel</div><div class="ps-desc">72 clientes, 222 operações, 864 ratings, 92 limites e 432 exposições.</div></div>
+        <div class="pipe-step"><div class="ps-title">2. SQL Server</div><div class="ps-desc">Prototipagem, deduplicação, PK/FK e validação das regras do case.</div></div>
+        <div class="pipe-step"><div class="ps-title">3. Athena</div><div class="ps-desc">Conversão das views para Presto/Trino, preservando a camada semântica.</div></div>
+        <div class="pipe-step"><div class="ps-title">4. QuickSight</div><div class="ps-desc">Arquitetura-alvo. Este HTML representa o mockup interativo da futura publicação.</div></div>
+      </div>
+      <div class="fonte-obs"><strong>Leitura recomendada:</strong> use esta versão sem tags técnicas para apresentação executiva. Se precisar da versão técnica, basta alterar a constante <strong>SHOW_TECH_TAGS</strong> no script.</div>
+    </div>
+  </div>
+</div>
+
+<div class="nota">
+  <div style="font-size:16px;flex-shrink:0">💡</div>
+  <div class="nota-text"><strong>Nota Técnica:</strong> Queries desenvolvidas em <strong>SQL Server Developer Edition</strong> (prototipagem local) · Script convertido para <strong>Amazon Athena (Presto/Trino)</strong> · Mockup em <strong>HTML interativo</strong> simulando o <strong>Amazon QuickSight</strong> · Arquitetura alvo: <strong>S3 → AWS Glue + Athena → QuickSight</strong> · 72 clientes · 222 operações · 864 ratings · 92 limites · 432 exposições.</div>
+</div>
+
+<script>
+'use strict';
+const SHOW_TECH_TAGS = false;
+if(!SHOW_TECH_TAGS) document.body.classList.add('exec-mode');
+
+const C={ORANGE:'#EC7000',NAVY:'#0D1B2A',NAVY_MID:'#1C3450',NAVY_LT:'#2A4A6B',GREEN:'#1A7F4B',RED:'#C0392B',YELLOW:'#B45309',GRAY:'#BFC3CA',BLUE:'#1A73B5'};
+const STATE={seg:'',setor:'',reg:'',period:'12m'};
+const MONTHS_ALL=['Mar/25','Abr/25','Mai/25','Jun/25','Jul/25','Ago/25','Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26'];
+const PERIOD_CFG={
+  '3m' :{start:9,factor:0.30,label:'3 meses',tag:'3M',maxDias:90,rangeLabel:'Dez/25 → Fev/26'},
+  '6m' :{start:6,factor:0.55,label:'6 meses',tag:'6M',maxDias:180,rangeLabel:'Set/25 → Fev/26'},
+  '12m':{start:0,factor:1.00,label:'12 meses',tag:'12M',maxDias:9999,rangeLabel:'Mar/25 → Fev/26'},
+  'all':{start:0,factor:1.18,label:'Acumulado',tag:'Acum',maxDias:9999,rangeLabel:'Mar/25 → Fev/26'}
+};
+const PERIOD_SEG_IMPACT={
+  '3m':{
+    'Corporate':{scoreDelta:-9,pdMult:1.18,descMult:1.14,bucketDrift:0.55},
+    'Wholesale':{scoreDelta:-6,pdMult:1.12,descMult:1.09,bucketDrift:0.42},
+    'Middle Market':{scoreDelta:-12,pdMult:1.22,descMult:1.18,bucketDrift:0.70}
+  },
+  '6m':{
+    'Corporate':{scoreDelta:-5,pdMult:1.09,descMult:1.08,bucketDrift:0.35},
+    'Wholesale':{scoreDelta:-3,pdMult:1.06,descMult:1.05,bucketDrift:0.24},
+    'Middle Market':{scoreDelta:-7,pdMult:1.12,descMult:1.10,bucketDrift:0.45}
+  },
+  '12m':{
+    'Corporate':{scoreDelta:0,pdMult:1.00,descMult:1.00,bucketDrift:0.00},
+    'Wholesale':{scoreDelta:0,pdMult:1.00,descMult:1.00,bucketDrift:0.00},
+    'Middle Market':{scoreDelta:0,pdMult:1.00,descMult:1.00,bucketDrift:0.00}
+  },
+  'all':{
+    'Corporate':{scoreDelta:4,pdMult:0.94,descMult:0.92,bucketDrift:-0.18},
+    'Wholesale':{scoreDelta:3,pdMult:0.96,descMult:0.94,bucketDrift:-0.12},
+    'Middle Market':{scoreDelta:2,pdMult:0.97,descMult:0.95,bucketDrift:-0.08}
+  }
+};
+const PORTFOLIO_BASE={expTotal:9491,descPct:25.0,scoreAvg:791,pdAvg:3.2167,provTotal:81.1,utilAvg:64.95,above80:16,above85:7,aprov:9944,utilizado:8412};
+const SCORE_DATA={
+  'Middle Market':[824,819,817,816,812,814,806,803,805,805,803,809],
+  'Wholesale':[813,809,806,809,808,803,805,797,797,802,802,805],
+  'Corporate':[756,750,761,770,762,756,765,763,766,760,759,767]
+};
+const SEG_KPIS={'':{ score:791,pd:3.22},'Corporate':{score:769,pd:3.69},'Wholesale':{score:805,pd:3.17},'Middle Market':{score:805,pd:2.68}};
+const GARANTIAS_BASE={'Corporate':{forte:43.2,moderada:34.9,sem:21.9},'Wholesale':{forte:58.1,moderada:28.4,sem:13.5},'Middle Market':{forte:40.3,moderada:37.2,sem:22.5}};
+const PRODUCT_WEIGHTS_BASE={
+  'Corporate':{aprov:[0.25,0.21,0.34,0.20],util:[0.26,0.20,0.33,0.21]},
+  'Wholesale':{aprov:[0.39,0.24,0.19,0.18],util:[0.40,0.22,0.20,0.18]},
+  'Middle Market':{aprov:[0.46,0.20,0.12,0.22],util:[0.48,0.18,0.11,0.23]}
+};
+const STATS_PERCENTILES={
+  'Corporate':{p25:761,p50:783,p75:870,p95:918},
+  'Wholesale':{p25:786,p50:872,p75:892,p95:935},
+  'Middle Market':{p25:744,p50:772,p75:823,p95:841}
+};
+const VOLATILITY={
+  'Corporate':7.2,'Wholesale':4.3,'Middle Market':5.9
+};
+const CRISE_MESES=['Set/25','Out/25','Nov/25','Dez/25','Jan/26','Fev/26'];
+
+const ALL_CLIENTS=[
+{id:'CLI779',seg:'Corporate',setor:'Saúde',reg:'Sudeste',exp:379.43,util:78.8,desc:25,rating:'BBB+',score:771,pd:1.20},
+{id:'CLI368',seg:'Corporate',setor:'Tecnologia',reg:'Sudeste',exp:351.52,util:91.6,desc:25,rating:'AA-',score:895,pd:0.25},
+{id:'CLI385',seg:'Corporate',setor:'Varejo',reg:'Nordeste',exp:232.50,util:84.7,desc:25,rating:'BBB',score:763,pd:1.80},
+{id:'CLI641',seg:'Corporate',setor:'Construção Civil',reg:'Sudeste',exp:213.87,util:77.1,desc:25,rating:'BBB+',score:771,pd:1.10},
+{id:'CLI211',seg:'Corporate',setor:'Agronegócio',reg:'Centro-Oeste',exp:145.05,util:85.2,desc:25,rating:'A+',score:877,pd:0.45},
+{id:'CLI320',seg:'Corporate',setor:'Tecnologia',reg:'Sul',exp:89.88,util:89.6,desc:25,rating:'AA-',score:877,pd:0.24},
+{id:'CLI340',seg:'Corporate',setor:'Agronegócio',reg:'Norte',exp:55.24,util:75.3,desc:25,rating:'A',score:840,pd:0.60},
+{id:'CLI643',seg:'Corporate',setor:'Saúde',reg:'Nordeste',exp:36.16,util:75.6,desc:25,rating:'A-',score:823,pd:0.85},
+{id:'CLI520',seg:'Corporate',setor:'Construção Civil',reg:'Sul',exp:0,util:77.6,desc:null,rating:'A',score:840,pd:0.70},
+{id:'CLI862',seg:'Corporate',setor:'Tecnologia',reg:'Sudeste',exp:542.55,util:89.4,desc:25,rating:'AA',score:920,pd:0.18},
+{id:'CLI402',seg:'Corporate',setor:'Saúde',reg:'Sudeste',exp:430.46,util:72.1,desc:25,rating:'AA+',score:940,pd:0.12},
+{id:'CLI524',seg:'Corporate',setor:'Automotivo',reg:'Sul',exp:313.87,util:68.5,desc:25,rating:'AA',score:900,pd:0.15},
+{id:'CLI103',seg:'Corporate',setor:'Educação',reg:'Sudeste',exp:376.65,util:65.0,desc:25,rating:'A+',score:870,pd:0.42},
+{id:'CLI204',seg:'Corporate',setor:'Educação',reg:'Sul',exp:340.78,util:62.0,desc:25,rating:'A',score:845,pd:0.68},
+{id:'CLI305',seg:'Corporate',setor:'Tecnologia',reg:'Sudeste',exp:260.07,util:58.0,desc:25,rating:'A+',score:865,pd:0.43},
+{id:'CLI406',seg:'Corporate',setor:'Construção Civil',reg:'Centro-Oeste',exp:188.32,util:55.0,desc:25,rating:'BBB+',score:782,pd:0.95},
+{id:'CLI507',seg:'Corporate',setor:'Químico',reg:'Nordeste',exp:174.87,util:60.0,desc:25,rating:'A-',score:830,pd:0.80},
+{id:'CLI608',seg:'Corporate',setor:'Mineração',reg:'Norte',exp:165.90,util:58.0,desc:25,rating:'BBB',score:775,pd:1.40},
+{id:'CLI709',seg:'Corporate',setor:'Varejo',reg:'Sudeste',exp:143.49,util:70.0,desc:25,rating:'A',score:852,pd:0.65},
+{id:'CLI810',seg:'Corporate',setor:'Agronegócio',reg:'Centro-Oeste',exp:125.55,util:63.0,desc:25,rating:'BBB+',score:788,pd:1.05},
+{id:'CLI911',seg:'Corporate',setor:'Automotivo',reg:'Sul',exp:107.61,util:55.0,desc:25,rating:'A+',score:875,pd:0.40},
+{id:'CLI121',seg:'Corporate',setor:'Saúde',reg:'Sudeste',exp:85.19,util:66.0,desc:25,rating:'A',score:843,pd:0.70},
+{id:'CLI222',seg:'Corporate',setor:'Energia',reg:'Norte',exp:40.36,util:58.0,desc:25,rating:'AA-',score:895,pd:0.22},
+{id:'CLI323',seg:'Corporate',setor:'Mineração',reg:'Centro-Oeste',exp:78.92,util:60.0,desc:25,rating:'BBB',score:773,pd:1.50},
+{id:'CLI424',seg:'Corporate',setor:'Construção Civil',reg:'Nordeste',exp:64.57,util:62.0,desc:25,rating:'BBB-',score:752,pd:2.00},
+{id:'CLI525',seg:'Corporate',setor:'Tecnologia',reg:'Sul',exp:49.32,util:61.0,desc:25,rating:'A',score:848,pd:0.67},
+{id:'CLI626',seg:'Corporate',setor:'Saúde',reg:'Norte',exp:37.66,util:69.0,desc:25,rating:'BBB+',score:783,pd:0.98},
+{id:'CLI727',seg:'Corporate',setor:'Varejo',reg:'Centro-Oeste',exp:35.00,util:65.0,desc:25,rating:'BBB',score:765,pd:1.70},
+{id:'CLI446',seg:'Wholesale',setor:'Saúde',reg:'Sul',exp:377.92,util:80.1,desc:25,rating:'A',score:840,pd:0.70},
+{id:'CLI961',seg:'Wholesale',setor:'Educação',reg:'Sudeste',exp:335.41,util:77.2,desc:25,rating:'AA',score:886,pd:0.18},
+{id:'CLI710',seg:'Wholesale',setor:'Tecnologia',reg:'Sul',exp:157.78,util:92.3,desc:25,rating:'BBB-',score:744,pd:2.10},
+{id:'CLI651',seg:'Wholesale',setor:'Tecnologia',reg:'Sudeste',exp:106.82,util:92.1,desc:25,rating:'BB+',score:696,pd:3.20},
+{id:'CLI661',seg:'Wholesale',setor:'Saúde',reg:'Sul',exp:34.72,util:84.8,desc:25,rating:'BB+',score:696,pd:3.50},
+{id:'CLI832',seg:'Wholesale',setor:'Mineração',reg:'Norte',exp:506.78,util:62.0,desc:25,rating:'AA',score:892,pd:0.20},
+{id:'CLI933',seg:'Wholesale',setor:'Agronegócio',reg:'Centro-Oeste',exp:480.00,util:58.0,desc:25,rating:'AA+',score:935,pd:0.11},
+{id:'CLI134',seg:'Wholesale',setor:'Tecnologia',reg:'Sudeste',exp:380.09,util:71.0,desc:25,rating:'AA-',score:898,pd:0.20},
+{id:'CLI235',seg:'Wholesale',setor:'Construção Civil',reg:'Sul',exp:302.12,util:65.0,desc:25,rating:'A+',score:872,pd:0.38},
+{id:'CLI336',seg:'Wholesale',setor:'Educação',reg:'Centro-Oeste',exp:258.26,util:68.0,desc:25,rating:'AA',score:887,pd:0.18},
+{id:'CLI437',seg:'Wholesale',setor:'Saúde',reg:'Nordeste',exp:214.41,util:60.0,desc:25,rating:'AA-',score:893,pd:0.22},
+{id:'CLI538',seg:'Wholesale',setor:'Químico',reg:'Centro-Oeste',exp:195.00,util:55.0,desc:25,rating:'A+',score:868,pd:0.44},
+{id:'CLI639',seg:'Wholesale',setor:'Mineração',reg:'Norte',exp:170.55,util:62.0,desc:25,rating:'A',score:850,pd:0.60},
+{id:'CLI740',seg:'Wholesale',setor:'Automotivo',reg:'Sul',exp:151.06,util:57.0,desc:25,rating:'A+',score:875,pd:0.40},
+{id:'CLI841',seg:'Wholesale',setor:'Varejo',reg:'Sudeste',exp:77.97,util:63.0,desc:25,rating:'A',score:855,pd:0.62},
+{id:'CLI942',seg:'Wholesale',setor:'Energia',reg:'Centro-Oeste',exp:63.35,util:59.0,desc:25,rating:'AA-',score:888,pd:0.24},
+{id:'CLI143',seg:'Wholesale',setor:'Tecnologia',reg:'Nordeste',exp:46.78,util:70.0,desc:25,rating:'BBB+',score:786,pd:0.90},
+{id:'CLI244',seg:'Wholesale',setor:'Agronegócio',reg:'Norte',exp:37.03,util:65.0,desc:25,rating:'A-',score:828,pd:0.82},
+{id:'CLI345',seg:'Wholesale',setor:'Construção Civil',reg:'Sudeste',exp:27.29,util:60.0,desc:25,rating:'BBB',score:775,pd:1.30},
+{id:'CLI524b',seg:'Middle Market',setor:'Agronegócio',reg:'Centro-Oeste',exp:83.13,util:79.6,desc:25,rating:'BBB',score:763,pd:1.50},
+{id:'CLI278',seg:'Middle Market',setor:'Energia',reg:'Norte',exp:58.33,util:82.4,desc:25,rating:'BBB+',score:771,pd:1.00},
+{id:'CLI749',seg:'Middle Market',setor:'Educação',reg:'Sudeste',exp:50.98,util:86.7,desc:25,rating:'BBB-',score:744,pd:2.30},
+{id:'CLI391',seg:'Middle Market',setor:'Tecnologia',reg:'Nordeste',exp:28.59,util:82.4,desc:25,rating:'BBB+',score:771,pd:1.10},
+{id:'CLI672',seg:'Middle Market',setor:'Varejo',reg:'Norte',exp:9.91,util:89.9,desc:25,rating:'BB',score:659,pd:4.20},
+{id:'CLI383',seg:'Middle Market',setor:'Energia',reg:'Nordeste',exp:7.98,util:84.0,desc:25,rating:'BB-',score:556,pd:5.10},
+{id:'CLI328',seg:'Middle Market',setor:'Varejo',reg:'Sudeste',exp:6.34,util:84.2,desc:25,rating:'BBB',score:763,pd:1.60},
+{id:'CLI370',seg:'Middle Market',setor:'Mineração',reg:'Norte',exp:6.27,util:76.8,desc:25,rating:'A-',score:823,pd:0.90},
+{id:'CLI422',seg:'Middle Market',setor:'Saúde',reg:'Sudeste',exp:0,util:80.0,desc:null,rating:'BBB+',score:771,pd:1.00},
+{id:'CLI951',seg:'Middle Market',setor:'Agronegócio',reg:'Centro-Oeste',exp:0,util:84.9,desc:null,rating:'BBB-',score:744,pd:2.00},
+{id:'CLI108',seg:'Middle Market',setor:'Automotivo',reg:'Norte',exp:52.67,util:58.0,desc:25,rating:'BB',score:640,pd:4.50},
+{id:'CLI155',seg:'Middle Market',setor:'Construção Civil',reg:'Sudeste',exp:41.09,util:62.0,desc:25,rating:'BBB',score:768,pd:1.45},
+{id:'CLI256',seg:'Middle Market',setor:'Saúde',reg:'Sul',exp:32.28,util:55.0,desc:25,rating:'BBB+',score:784,pd:0.92},
+{id:'CLI357',seg:'Middle Market',setor:'Tecnologia',reg:'Centro-Oeste',exp:26.41,util:60.0,desc:25,rating:'A-',score:826,pd:0.81},
+{id:'CLI458',seg:'Middle Market',setor:'Agronegócio',reg:'Norte',exp:22.01,util:58.0,desc:25,rating:'BBB',score:772,pd:1.35},
+{id:'CLI559',seg:'Middle Market',setor:'Educação',reg:'Nordeste',exp:17.61,util:65.0,desc:25,rating:'BBB-',score:750,pd:1.95},
+{id:'CLI660',seg:'Middle Market',setor:'Varejo',reg:'Sudeste',exp:14.67,util:70.0,desc:25,rating:'BB+',score:698,pd:3.10},
+{id:'CLI761',seg:'Middle Market',setor:'Químico',reg:'Sul',exp:12.47,util:62.0,desc:25,rating:'A',score:838,pd:0.73},
+{id:'CLI862b',seg:'Middle Market',setor:'Mineração',reg:'Norte',exp:10.57,util:68.0,desc:25,rating:'BBB+',score:779,pd:1.02},
+{id:'CLI963',seg:'Middle Market',setor:'Energia',reg:'Centro-Oeste',exp:8.80,util:55.0,desc:25,rating:'A-',score:829,pd:0.78},
+{id:'CLI164',seg:'Middle Market',setor:'Automotivo',reg:'Sul',exp:8.51,util:60.0,desc:25,rating:'BBB',score:769,pd:1.42},
+{id:'CLI265',seg:'Middle Market',setor:'Construção Civil',reg:'Nordeste',exp:7.63,util:72.0,desc:25,rating:'BB+',score:695,pd:3.20},
+{id:'CLI366',seg:'Middle Market',setor:'Saúde',reg:'Sudeste',exp:7.04,util:58.0,desc:25,rating:'BBB+',score:786,pd:0.91},
+{id:'CLI467',seg:'Middle Market',setor:'Tecnologia',reg:'Centro-Oeste',exp:6.02,util:63.0,desc:25,rating:'A',score:841,pd:0.68},
+{id:'CLI568',seg:'Middle Market',setor:'Agronegócio',reg:'Norte',exp:5.58,util:67.0,desc:25,rating:'BBB',score:766,pd:1.48}
+];
+(()=>{const total=ALL_CLIENTS.reduce((s,c)=>s+(c.exp||0),0); const factor=9491/total; ALL_CLIENTS.forEach(c=>{if(c.exp)c.exp=+((c.exp*factor).toFixed(2));});})();
+const VENCIDAS=[
+{id:'CLI368',seg:'Corporate',setor:'Tecnologia',reg:'Sudeste',prod:'Financiamento',val:182.80,dias:87,rating:'AA-',pd:0.25,pri:'2 - ALTA'},
+{id:'CLI488',seg:'Corporate',setor:'Químico',reg:'Nordeste',prod:'Trade Finance',val:161.26,dias:90,rating:'AA',pd:0.22,pri:'4 - BAIXA'},
+{id:'CLI318',seg:'Wholesale',setor:'Químico',reg:'Centro-Oeste',prod:'Capital de Giro',val:118.80,dias:640,rating:'A',pd:0.70,pri:'4 - BAIXA'},
+{id:'CLI320',seg:'Corporate',setor:'Tecnologia',reg:'Sul',prod:'Trade Finance',val:100.23,dias:869,rating:'AA-',pd:0.24,pri:'4 - BAIXA'},
+{id:'CLI108',seg:'Wholesale',setor:'Automotivo',reg:'Norte',prod:'Trade Finance',val:35.89,dias:679,rating:'BB',pd:4.41,pri:'3 - MEDIA'},
+{id:'CLI956',seg:'Wholesale',setor:'Mineração',reg:'Norte',prod:'Trade Finance',val:33.83,dias:932,rating:'C',pd:31.09,pri:'1 - URGENTE'},
+{id:'CLI334',seg:'Wholesale',setor:'Educação',reg:'Sudeste',prod:'Trade Finance',val:29.71,dias:127,rating:'BB+',pd:2.98,pri:'3 - MEDIA'},
+{id:'CLI868',seg:'Wholesale',setor:'Educação',reg:'Nordeste',prod:'Trade Finance',val:22.73,dias:109,rating:'BBB-',pd:2.28,pri:'3 - MEDIA'},
+{id:'CLI956b',seg:'Wholesale',setor:'Mineração',reg:'Norte',prod:'Trade Finance',val:21.58,dias:292,rating:'C',pd:31.09,pri:'1 - URGENTE'},
+{id:'CLI690',seg:'Middle Market',setor:'Saúde',reg:'Sul',prod:'Trade Finance',val:1.89,dias:315,rating:'BBB+',pd:1.12,pri:'3 - MEDIA'},
+{id:'CLI839',seg:'Middle Market',setor:'Saúde',reg:'Sudeste',prod:'Capital de Giro',val:0.54,dias:639,rating:'AAA',pd:0.12,pri:'4 - BAIXA'}
+];
+
+const CHARTS={};
+const emptyStatePlugin={
+  id:'emptyState',
+  afterDraw(chart,args,pluginOptions){
+    const opts=pluginOptions||{};
+    if(opts.display===false) return;
+    const datasets=(chart.data?.datasets)||[];
+    const hasData=datasets.some(ds=>{
+      const data=ds.data||[];
+      return data.some(point=>{
+        if(point==null) return false;
+        if(typeof point==='number') return point!==0;
+        if(Array.isArray(point)) return point.some(v=>!!v);
+        if(typeof point==='object') return Object.values(point).some(v=>typeof v==='number'?v!==0:!!v);
+        return !!point;
+      });
+    });
+    if(hasData) return;
+    const {ctx,chartArea}=chart;
+    if(!chartArea) return;
+    ctx.save();
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillStyle='#6B7280';
+    ctx.font='600 12px Inter, sans-serif';
+    ctx.fillText(opts.message||'Sem dados para o recorte selecionado', (chartArea.left+chartArea.right)/2, (chartArea.top+chartArea.bottom)/2);
+    ctx.restore();
+  }
+};
+const baseAxis={x:{grid:{color:'#E8EAED'},ticks:{font:{family:'Inter',size:10},color:'#6B7280'}},y:{grid:{color:'#E8EAED'},ticks:{font:{family:'Inter',size:10},color:'#6B7280'}}};
+const baseLegend={labels:{font:{family:'Inter',size:11},boxWidth:10,padding:10}};
+function createChart(id,type,data,options){
+  const el=document.getElementById(id);
+  if(!el) return null;
+  if(CHARTS[id]) CHARTS[id].destroy();
+  const mergedOptions={...options,plugins:{emptyState:{message:'Sem dados para o recorte selecionado'},...(options?.plugins||{})}};
+  CHARTS[id]=new Chart(el,{type,data,options:mergedOptions});
+  return CHARTS[id];
+}
+function setText(id,v){const el=document.getElementById(id); if(el) el.textContent=v;}
+function sum(arr){return arr.reduce((a,b)=>a+b,0)} function avg(arr){return arr.length?sum(arr)/arr.length:0}
+function fmt(v){return v>=1000?`R$ ${(v/1000).toFixed(2).replace('.',',')} Bi`:`R$ ${v.toFixed(1).replace('.',',')} M`}
+function pc(){return PERIOD_CFG[STATE.period]}
+function clamp(v,min,max){return Math.min(Math.max(v,min),max)}
+function riskFlags(c){const desc=(getAdjustedDesc(c)||0); return {high:c.util>80 && desc>30, attention:(c.util>75 || desc>25)}}
+function ratingBucket(r){const inv=['AAA','AA+','AA','AA-','A+','A','A-']; const med=['BBB+','BBB','BBB-']; return inv.includes(r)?0:med.includes(r)?1:(['BB+','BB','BB-'].includes(r)?2:3)}
+function percentile(arr,p){
+  if(!arr.length) return 0;
+  const sorted=[...arr].sort((a,b)=>a-b);
+  const idx=(sorted.length-1)*p;
+  const low=Math.floor(idx), high=Math.ceil(idx);
+  if(low===high) return sorted[low];
+  return sorted[low]+(sorted[high]-sorted[low])*(idx-low);
+}
+function stddev(arr){
+  if(arr.length<2) return 0;
+  const mean=avg(arr);
+  return Math.sqrt(avg(arr.map(v=>(v-mean)**2)));
+}
+function getSegLabels(clients){
+  const order=['Corporate','Wholesale','Middle Market'];
+  const labels=order.filter(seg=>clients.some(c=>c.seg===seg));
+  return labels.length?labels:order;
+}
+function getPeriodImpact(seg){
+  return (PERIOD_SEG_IMPACT[STATE.period]&&PERIOD_SEG_IMPACT[STATE.period][seg])||{scoreDelta:0,pdMult:1,descMult:1,bucketDrift:0};
+}
+function getSegmentExposurePeriodFactor(seg){
+  const byPeriod={
+    '3m':{'Corporate':0.22,'Wholesale':0.31,'Middle Market':0.39},
+    '6m':{'Corporate':0.48,'Wholesale':0.58,'Middle Market':0.66},
+    '12m':{'Corporate':1.00,'Wholesale':1.00,'Middle Market':1.00},
+    'all':{'Corporate':1.12,'Wholesale':1.21,'Middle Market':1.28}
+  };
+  return (byPeriod[STATE.period]&&byPeriod[STATE.period][seg])||1;
+}
+function getWeightedPeriodMetric(clients,key,defaultValue){
+  const totalExp=sum(clients.map(c=>c.exp||0));
+  if(!clients.length||!totalExp) return defaultValue;
+  return ['Corporate','Wholesale','Middle Market'].reduce((acc,seg)=>{
+    const segExp=sum(clients.filter(c=>c.seg===seg).map(c=>c.exp||0));
+    if(!segExp) return acc;
+    return acc + ((segExp/totalExp) * getPeriodImpact(seg)[key]);
+  },0);
+}
+function getBaseDescBias(c){
+  const segBias=c.seg==='Corporate'?-1.4:c.seg==='Wholesale'?-0.3:1.8;
+  const regBias=c.reg==='Sudeste'?-0.4:c.reg==='Sul'?-0.2:c.reg==='Nordeste'?0.9:c.reg==='Norte'?1.1:0.3;
+  const setorBias={
+    'Tecnologia':-1.0,
+    'Saúde':-0.5,
+    'Educação':0.1,
+    'Construção Civil':0.8,
+    'Químico':0.6,
+    'Mineração':0.7,
+    'Automotivo':0.5,
+    'Agronegócio':0.2,
+    'Varejo':1.6,
+    'Energia':0.3
+  }[c.setor]||0;
+  const riskBias=((c.util-65)/14)+((c.pd-1.2)*1.8)+((780-c.score)/85);
+  return segBias + regBias + setorBias + riskBias;
+}
+function getAdjustedDesc(c){
+  if(c.desc==null) return null;
+  const structuralDesc=clamp(c.desc + getBaseDescBias(c),5,60);
+  return clamp(structuralDesc * getPeriodImpact(c.seg).descMult,0,100);
+}
+function getAdjustedScore(c){
+  return Math.round(clamp(c.score + getPeriodImpact(c.seg).scoreDelta,300,1000));
+}
+function getAdjustedPd(c){
+  return clamp(c.pd * getPeriodImpact(c.seg).pdMult,0,100);
+}
+function getAdjustedBucket(c){
+  const drift=getPeriodImpact(c.seg).bucketDrift;
+  const stress=(c.util>=85?0.45:c.util>=75?0.2:0)+(getAdjustedDesc(c)!=null&&getAdjustedDesc(c)>=30?0.35:0)+(getAdjustedScore(c)<750?0.25:0);
+  return clamp(Math.round(ratingBucket(c.rating)+drift+stress),0,3);
+}
+function getActiveScopeLabel(){
+  const parts=[STATE.seg,STATE.setor,STATE.reg].filter(Boolean);
+  return parts.length?`${parts.join(' · ')} · ${pc().tag}`:`Carteira total · ${pc().tag}`;
+}
+function getCrisisUniverse(){
+  return ALL_CLIENTS.filter(c=>c.setor==='Varejo')
+    .sort((a,b)=>((b.util+(1000-b.score)/20+(ratingBucket(b.rating)*8))-(a.util+(1000-a.score)/20+(ratingBucket(a.rating)*8))))
+    .slice(0,7)
+    .map(c=>{
+      const stressBase=clamp(c.util*0.18 + (800-c.score)/9 + ratingBucket(c.rating)*4 + 6,4,26);
+      const desc=clamp((c.desc==null?25:c.desc)+stressBase,18,55);
+      const util=clamp(c.util + 8 + ratingBucket(c.rating)*3,55,98);
+      const riskScore=util + desc + ratingBucket(c.rating)*10;
+      return {
+        id:c.id,
+        seg:c.seg,
+        setor:c.setor,
+        reg:c.reg,
+        rating:c.rating,
+        util:+util.toFixed(1),
+        desc:+desc.toFixed(1),
+        exp:+((c.exp||0) * (STATE.period==='all'?1.12:STATE.period==='6m'?0.82:STATE.period==='3m'?0.55:1)).toFixed(1),
+        status:riskScore>135?'Crítico':riskScore>120?'Monitorar':'Alerta'
+      };
+    });
+}
+function buildCrisisSeries(row){
+  const start=6-ratingBucket(row.rating);
+  const severity=row.status==='Crítico'?3:row.status==='Monitorar'?2:1;
+  return CRISE_MESES.map((_,idx)=>clamp(start-Math.max(0,idx-(3-severity)),1,6));
+}
+function getScoreSeriesEntries(clients){
+  return getSegLabels(clients).filter(seg=>clients.some(c=>c.seg===seg)).map(seg=>{
+    const segClients=clients.filter(c=>c.seg===seg);
+    const allSegClients=ALL_CLIENTS.filter(c=>c.seg===seg);
+    const baseSeries=SCORE_DATA[seg]||[];
+    const baseAvg=avg(allSegClients.map(c=>c.score));
+    const currentAvg=avg(segClients.map(c=>getAdjustedScore(c)));
+    const delta=segClients.length&&allSegClients.length?(currentAvg-baseAvg):0;
+    return {seg,data:baseSeries.map(v=>Math.round(clamp(v+delta,500,980)))};
+  });
+}
+function getGarantiaMix(rows,seg){
+  if(!rows.length) return {forte:0,moderada:0,sem:0};
+  const base=GARANTIAS_BASE[seg]||{forte:45,moderada:30,sem:25};
+  const avgUtil=avg(rows.map(c=>c.util));
+  const avgScore=avg(rows.map(c=>c.score));
+  const expTotal=sum(rows.map(c=>c.exp||0))||rows.length||1;
+  const uncovered=sum(rows.filter(c=>c.desc!=null).map(c=>(c.exp||0)*(c.desc/100)))/(expTotal||1)*100;
+  const stress=((avgUtil-65)/20)+((800-avgScore)/180);
+  const sem=clamp(uncovered+(stress*3),8,70);
+  const forte=clamp(base.forte-(stress*5),10,92-sem);
+  const moderada=Math.max(0,100-forte-sem);
+  return {forte:+forte.toFixed(1),moderada:+moderada.toFixed(1),sem:+sem.toFixed(1)};
+}
+function buildProductMix(clients,kpis){
+  const labels=['Cap. Giro','Trade Finance','Project Finance','Financiamento'];
+  if(!clients.length) return {labels,aprov:Array(labels.length).fill(0),util:Array(labels.length).fill(0)};
+  const segs=getSegLabels(clients).filter(seg=>clients.some(c=>c.seg===seg));
+  const expBySeg=Object.fromEntries(segs.map(seg=>[seg,sum(clients.filter(c=>c.seg===seg).map(c=>c.exp||0))]));
+  const totalExp=sum(Object.values(expBySeg))||1;
+  const aprovWeights=labels.map((_,idx)=>segs.reduce((acc,seg)=>acc+((expBySeg[seg]||0)/totalExp)*(PRODUCT_WEIGHTS_BASE[seg]?.aprov[idx]||0),0));
+  const utilWeights=labels.map((_,idx)=>segs.reduce((acc,seg)=>acc+((expBySeg[seg]||0)/totalExp)*(PRODUCT_WEIGHTS_BASE[seg]?.util[idx]||0),0));
+  return {labels,aprov:aprovWeights.map(w=>+((kpis.aprov/1000)*w).toFixed(2)),util:utilWeights.map(w=>+((kpis.utiliz/1000)*w).toFixed(2))};
+}
+function getCrisisRows(){
+  return getCrisisUniverse().filter(r=>{
+    if(STATE.seg && r.seg!==STATE.seg) return false;
+    if(STATE.setor && r.setor!==STATE.setor) return false;
+    if(STATE.reg && r.reg!==STATE.reg) return false;
+    return true;
+  });
+}
+function getCrisisStartIndex(){return STATE.period==='3m'?3:0}
+
+function getClients(){
+  return ALL_CLIENTS.filter(c=>{
+    if(STATE.seg && c.seg!==STATE.seg) return false;
+    if(STATE.setor && c.setor!==STATE.setor) return false;
+    if(STATE.reg && c.reg!==STATE.reg) return false;
+    return true;
+  });
+}
+function getVencidas(){
+  const maxDias=pc().maxDias;
+  let rows=maxDias<9999?VENCIDAS.filter(v=>v.dias<=maxDias):[...VENCIDAS];
+  if(STATE.seg) rows=rows.filter(v=>v.seg===STATE.seg);
+  if(STATE.setor) rows=rows.filter(v=>v.setor===STATE.setor);
+  if(STATE.reg) rows=rows.filter(v=>v.reg===STATE.reg);
+  return rows;
+}
+function getSectorData(clients){
+  const total=sum(clients.map(c=>c.exp||0))||1;
+  const setores=['Tecnologia','Saúde','Educação','Construção Civil','Químico','Mineração','Automotivo','Agronegócio','Varejo','Energia'];
+  return setores.map(s=>{const rows=clients.filter(c=>c.setor===s); const exp=sum(rows.map(r=>r.exp||0)); return {setor:s,exp,pct:exp/total*100,n:rows.length};});
+}
+function computeKPIs(clients){
+  const factor=pc().factor;
+  const expBase=sum(clients.map(c=>c.exp||0));
+  const expTotal=expBase*factor;
+  const expDesc=sum(clients.filter(c=>getAdjustedDesc(c)!=null).map(c=>(c.exp||0)*(getAdjustedDesc(c)/100)))*factor;
+  const descPct=expTotal>0?expDesc/expTotal*100:0;
+  const scoreAvg=Math.round(avg(clients.map(c=>getAdjustedScore(c))));
+  const pdAvg=avg(clients.map(c=>getAdjustedPd(c)));
+  const flags=clients.map(c=>riskFlags(c));
+  const atencao=flags.filter(f=>f.attention && !f.high).length;
+  const alto=flags.filter(f=>f.high).length;
+  const normal=Math.max(clients.length-atencao-alto,0);
+  const hasAnyFilter=!!(STATE.seg||STATE.setor||STATE.reg||STATE.period!=='12m');
+  const utilAvg=hasAnyFilter?avg(clients.map(c=>c.util)):PORTFOLIO_BASE.utilAvg;
+  const above80=hasAnyFilter?clients.filter(c=>c.util>80).length:PORTFOLIO_BASE.above80;
+  const above85=hasAnyFilter?clients.filter(c=>c.util>85).length:PORTFOLIO_BASE.above85;
+  const aprov=hasAnyFilter?expTotal*1.048:PORTFOLIO_BASE.aprov*factor;
+  const utiliz=hasAnyFilter?aprov*(utilAvg/100):PORTFOLIO_BASE.utilizado*factor;
+  const provTotal=hasAnyFilter?sum(['Corporate','Wholesale','Middle Market'].map(seg=>{
+    const segRows=clients.filter(c=>c.seg===seg);
+    const desc=sum(segRows.filter(c=>getAdjustedDesc(c)!=null).map(c=>(c.exp||0)*(getAdjustedDesc(c)/100)))*factor;
+    const pdSeg=avg(segRows.map(c=>getAdjustedPd(c)))/100;
+    return desc*pdSeg;
+  })):PORTFOLIO_BASE.provTotal*factor;
+  return {clientes:clients.length,expTotal,descPct,scoreAvg,pdAvg,atencao,alto,normal,above80,above85,utilAvg,aprov,utiliz,provTotal};
+}
+function movingAverage3(arr){return arr.map((_,i)=>{const start=Math.max(0,i-2); const slice=arr.slice(start,i+1); return +(avg(slice)).toFixed(1)});}
+
+function initCharts(){
+  createChart('cClassifRisco','doughnut',{labels:['Grau Invest. Alto (AAA–A-)','Grau Invest. Baixo (BBB)','Grau Especulativo (BB)','Alto Risco (B/C)'],datasets:[{data:[0,0,0,0],backgroundColor:[C.GREEN+'CC',C.ORANGE+'CC',C.YELLOW+'CC',C.RED+'CC'],borderWidth:2,borderColor:'#fff'}]},{responsive:true,maintainAspectRatio:true,cutout:'65%',plugins:{legend:{display:false}}});
+  createChart('cProvSegmento','bar',{labels:['Corporate','Wholesale','Middle Market'],datasets:[{label:'PCLD (R$M)',data:[0,0,0],backgroundColor:[C.RED+'CC',C.ORANGE+'CC',C.GREEN+'CC'],borderRadius:4}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y,ticks:{callback:v=>v+'M'}}}});
+  createChart('cScoreEvol','line',{labels:MONTHS_ALL,datasets:[]},{responsive:true,maintainAspectRatio:true,plugins:{legend:baseLegend},scales:{...baseAxis,y:{...baseAxis.y,min:700,max:860}}});
+  createChart('cSegDonut','doughnut',{labels:['Corporate','Wholesale','Middle Market'],datasets:[{data:[0,0,0],backgroundColor:[C.NAVY_MID,C.ORANGE,C.GRAY],borderWidth:2,borderColor:'#fff'}]},{responsive:true,maintainAspectRatio:true,cutout:'65%',plugins:{legend:{display:false}}});
+  createChart('cSetorBar','bar',{labels:[],datasets:[{label:'% Portfólio',data:[],backgroundColor:[],borderRadius:4}]},{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,max:22,ticks:{callback:v=>v+'%'}},y:{...baseAxis.y,grid:{display:false}}}});
+  createChart('cRatingDist','bar',{labels:['AAA','AA+','AA','AA-','A+','A','A-','BBB+','BBB','BBB-','BB+','BB','BB-','B+','B','B-','C'],datasets:[{data:Array(17).fill(0),backgroundColor:[],borderRadius:3}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y}}});
+  createChart('cScatter','scatter',{datasets:[{label:'Clientes',data:[],backgroundColor:[],pointRadius:6,pointHoverRadius:8}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw.id} · Util ${ctx.raw.x.toFixed(1)}% | Desc ${ctx.raw.y.toFixed(1)}% | ${ctx.raw.cls}`}}},scales:{x:{...baseAxis.x,min:50,max:100,title:{display:true,text:'% Utilização'},ticks:{callback:v=>v+'%'}},y:{...baseAxis.y,min:0,max:45,title:{display:true,text:'% Descoberta'},ticks:{callback:v=>v+'%'}}}});
+  createChart('cRiskDonut','doughnut',{labels:['Normal','Atenção','Alto Risco'],datasets:[{data:[0,0,0],backgroundColor:[C.GREEN,C.ORANGE,C.RED],borderWidth:2,borderColor:'#fff'}]},{responsive:true,maintainAspectRatio:true,cutout:'65%',plugins:{legend:{display:false}}});
+  createChart('cMigracao','bar',{labels:['Melhora','Estável','Piora'],datasets:[{data:[0,0,0],backgroundColor:[C.GREEN+'CC',C.GRAY+'CC',C.RED+'CC'],borderRadius:4}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y}}});
+  createChart('cIntensidade','doughnut',{labels:['Sem alteração','Leve (1-2)','Moderada (3-4)','Significativa (5+)'],datasets:[{data:[0,0,0,0],backgroundColor:[C.GRAY,C.ORANGE+'CC',C.YELLOW+'CC',C.RED+'CC'],borderWidth:2,borderColor:'#fff'}]},{responsive:true,maintainAspectRatio:true,cutout:'55%',plugins:{legend:{labels:{font:{family:'Inter',size:10},boxWidth:8,padding:8}}}});
+  createChart('cProdBar','bar',{labels:['Cap. Giro','Trade Finance','Project Finance','Financiamento'],datasets:[{label:'Aprovado (R$Bi)',data:[0,0,0,0],backgroundColor:C.NAVY_MID+'CC',borderRadius:3},{label:'Utilizado (R$Bi)',data:[0,0,0,0],backgroundColor:C.ORANGE+'CC',borderRadius:3}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:baseLegend},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y,ticks:{callback:v=>v+'Bi'}}}});
+  createChart('cUtilHist','bar',{labels:['< 50%','50–60%','60–70%','70–75%','75–80%','80–85%','> 85%'],datasets:[{data:[0,0,0,0,0,0,0],backgroundColor:[C.GREEN+'99',C.GREEN+'99',C.GREEN+'99',C.GREEN+'99',C.ORANGE+'99',C.ORANGE+'CC',C.RED+'CC'],borderRadius:3}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y}}});
+  createChart('cTopUtil','bar',{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:4}]},{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,min:70,max:100,ticks:{callback:v=>v+'%'}},y:{...baseAxis.y,grid:{display:false}}}});
+  createChart('cGarantias','bar',{labels:['Corporate','Wholesale','Middle Market'],datasets:[{label:'Forte',data:[43.2,58.1,40.3],backgroundColor:C.GREEN+'CC'},{label:'Moderada',data:[34.9,28.4,37.2],backgroundColor:C.ORANGE+'99'},{label:'Sem cobertura',data:[21.9,13.5,22.5],backgroundColor:C.RED+'88'}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{font:{family:'Inter',size:10},boxWidth:8,padding:8}}},scales:{x:{...baseAxis.x,stacked:true,grid:{display:false}},y:{...baseAxis.y,stacked:true,max:100,ticks:{callback:v=>v+'%'}}}});
+  createChart('cPercentis','bar',{labels:['Corporate','Wholesale','Middle Market'],datasets:[{label:'P25',data:[],backgroundColor:C.GRAY+'CC',borderRadius:3},{label:'P50',data:[],backgroundColor:C.ORANGE+'99',borderRadius:3},{label:'P75',data:[],backgroundColor:C.ORANGE+'CC',borderRadius:3},{label:'P95',data:[],backgroundColor:C.NAVY_MID+'CC',borderRadius:3}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:baseLegend},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y,min:700,max:960}}});
+  createChart('cMA3','line',{labels:MONTHS_ALL,datasets:[]},{responsive:true,maintainAspectRatio:true,plugins:{legend:baseLegend},scales:{...baseAxis,y:{...baseAxis.y,min:740,max:840}}});
+  createChart('cVolatilidade','bar',{labels:['Corporate','Wholesale','Middle Market'],datasets:[{data:[0,0,0],backgroundColor:[C.NAVY_MID+'CC',C.ORANGE+'CC',C.GRAY+'CC'],borderRadius:4}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y}}});
+  createChart('cCrisisRating','line',{labels:CRISE_MESES,datasets:[]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{font:{family:'Inter',size:9},boxWidth:8,padding:8}}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y,min:1,max:6,ticks:{callback:v=>({1:'C',2:'B',3:'BB',4:'BBB',5:'A',6:'AA'}[v]||v)}}}});
+  createChart('cCrisisPcld','bar',{labels:['Haircut 10%','Haircut 20%','Haircut 30%'],datasets:[{label:'Impacto em PCLD (R$M)',data:[46,72,108],backgroundColor:[C.YELLOW+'CC',C.ORANGE+'CC',C.RED+'CC'],borderRadius:4}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y,ticks:{callback:v=>v+'M'}}}});
+}
+function upd(id,fn){if(CHARTS[id]){fn(CHARTS[id]); CHARTS[id].update();}}
+
+function updateTexts(clients,kpis){
+  const ops=Math.round(222*(clients.length/72||0)*pc().factor);
+  const scope=getActiveScopeLabel();
+  const crisisRows=getCrisisRows();
+  const crisisExp=sum(crisisRows.map(r=>r.exp||0));
+  setText('filter-count',`${clients.length} clientes · ${ops} operações`);
+  setText('kpi-period-label',pc().tag);
+  setText('score-sub',`Score médio mensal — ${pc().label}`);
+  setText('score-tag',`${pc().tag} · vw_score_por_segmento_mes`);
+  setText('rating-dist-sub',`Clientes por rating interno — ${clients.length} clientes`);
+  setText('scatter-sub',`${kpis.atencao + kpis.alto} clientes monitorados no recorte atual`);
+  setText('risk-donut-sub',`Atenção operacional vs alto risco do case · ${scope}`);
+  setText('risk-count',`${kpis.atencao + kpis.alto} registros`);
+  setText('toputil-sub',`Top 5 por utilização · ${clients.length} clientes`);
+  setText('migracao-sub',`${clients.length} clientes · ${pc().rangeLabel}`);
+  setText('migracao-int-sub',`Número de níveis alterados · ${scope}`);
+  setText('venc-sub',`${getVencidas().length} operação(ões) · período ${pc().tag}`);
+  setText('classif-sub',`Exposição por faixa de rating — ${clients.length} clientes · ${pc().tag}`);
+  setText('prov-seg-sub',`PCLD estimada por segmento · ${scope}`);
+  setText('seg-dist-sub',`Exposição do recorte ativo — ${scope}`);
+  setText('setor-sub',`% sobre o portfólio filtrado · limite regulatório: 15% · ${pc().tag}`);
+  setText('prod-sub',`Mix recalculado para o recorte ativo · ${scope}`);
+  setText('utilhist-sub',`Limite global — clientes no recorte ${pc().tag}`);
+  setText('garantia-sub',`% do valor aprovado por tipo de garantia · ${scope}`);
+  setText('percentis-sub',`P25, P50, P75 e P95 · ${scope}`);
+  setText('ma3-sub',`Suavização da tendência mensal · ${pc().tag}`);
+  setText('vol-sub',`Desvio-padrão das variações mensais · ${scope}`);
+  setText('crise-table-sub',`${crisisRows.length} clientes rastreados da base Varejo · exposição simulada ${fmt(crisisExp)}`);
+  setText('crise-rating-sub',`Trajetória simulada com base nos clientes Varejo do recorte ${pc().tag}`);
+  setText('crise-pcld-sub',`Base derivada do recorte ativo · ${scope}`);
+}
+function updateKPIs(clients,kpis){
+  setText('k-exp',fmt(kpis.expTotal));
+  setText('k-cli',`${kpis.clientes} clientes`);
+  setText('k-desc',`${kpis.descPct.toFixed(1).replace('.',',')}%`);
+  setText('k-score',String(kpis.scoreAvg));
+  setText('k-pd',`${kpis.pdAvg.toFixed(2).replace('.',',')}%`);
+  setText('k-venc',String(getVencidas().length));
+  setText('k-prov-total',fmt(kpis.provTotal));
+  setText('k-util',`${kpis.utilAvg.toFixed(1).replace('.',',')}%`);
+  setText('k-80',String(kpis.above80));
+  setText('k-85',String(kpis.above85));
+  setText('k-aprov',fmt(kpis.aprov));
+  setText('k-utiliz',fmt(kpis.utiliz));
+  setText('k-aprov-badge',`${(kpis.aprov?((kpis.utiliz/kpis.aprov)*100):0).toFixed(1).replace('.',',')}%`);
+  const setBadge=(id,cond,okTxt,noTxt,noClass)=>{const el=document.getElementById(id); if(el){el.className='badge '+(cond?'b-ok':noClass); el.textContent=cond?okTxt:noTxt;}};
+  setBadge('k-desc-badge',kpis.descPct<30,'✓ Na Meta','⚠ Revisão','b-att');
+  setBadge('k-score-badge',kpis.scoreAvg>=800,'✓ Muito Bom','⚠ Atenção','b-att');
+  setBadge('k-pd-badge',kpis.pdAvg<1,'✓ Na Meta','✗ Acima','b-crit');
+  setBadge('k-util-badge',kpis.utilAvg>=60&&kpis.utilAvg<=75,'✓ Ideal','⚠ Atenção','b-att');
+  setText('leg-att',`${kpis.atencao} clientes`);
+  setText('leg-high',`${kpis.alto} clientes`);
+  setText('leg-norm',`${kpis.normal} clientes`);
+}
+function updateAlerts(clients,kpis){
+  const box=document.getElementById('alert-box'); if(!box) return;
+  const sd=getSectorData(clients);
+  const over=sd.filter(s=>s.pct>15);
+  const mon=sd.filter(s=>s.pct>10&&s.pct<=15);
+  const blocks=[];
+  if(over.length) blocks.push(`<div class="alert red"><div class="alert-icon">🔴</div><div><div class="at">Concentração acima do limite regulatório</div><div class="ab">${over.map(x=>`${x.setor} (${x.pct.toFixed(1).replace('.',',')}%)`).join(', ')}.</div></div></div>`);
+  if(mon.length) blocks.push(`<div class="alert yellow"><div class="alert-icon">⚠️</div><div><div class="at">Setores em monitoramento</div><div class="ab">${mon.map(x=>`${x.setor} (${x.pct.toFixed(1).replace('.',',')}%)`).join(', ')}.</div></div></div>`);
+  blocks.push(`<div class="alert green"><div class="alert-icon">✅</div><div><div class="at">Exposição descoberta em ${kpis.descPct<30?'controle':'revisão'}</div><div class="ab">${kpis.descPct.toFixed(1).replace('.',',')}% no recorte ${pc().tag}.</div></div></div>`);
+  if(kpis.atencao+kpis.alto>0) blocks.push(`<div class="alert blue"><div class="alert-icon">📌</div><div><div class="at">${kpis.atencao+kpis.alto} clientes monitorados</div><div class="ab">Atenção operacional = util &gt; 75% ou descoberta &gt; 25%. Alto risco do case = util &gt; 80% e descoberta &gt; 30%.</div></div></div>`);
+  if(getVencidas().length>0) blocks.push(`<div class="alert yellow"><div class="alert-icon">⏳</div><div><div class="at">${getVencidas().length} operações vencidas</div><div class="ab">Priorizar cobrança e renegociação conforme criticidade.</div></div></div>`);
+  box.innerHTML=blocks.join('');
+}
+function updateRiskTable(clients){
+  const tbody=document.getElementById('risk-tbody'); if(!tbody) return;
+  const rows=[...clients].filter(c=>riskFlags(c).attention || riskFlags(c).high).sort((a,b)=>{
+    const ra=riskFlags(a).high?2:riskFlags(a).attention?1:0;
+    const rb=riskFlags(b).high?2:riskFlags(b).attention?1:0;
+    return rb-ra || (b.exp||0)-(a.exp||0);
+  });
+  if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="10">Nenhum cliente encontrado com os filtros selecionados.</td></tr>'; return;}
+  const ratingCls=r=>{const inv=['AAA','AA+','AA','AA-','A+','A','A-']; const med=['BBB+','BBB','BBB-']; return inv.includes(r)?'t-ok':med.includes(r)?'t-info':'t-att';};
+  const utilCls=u=>u>85?'pf-crit':u>75?'pf-att':'pf-ok';
+  tbody.innerHTML=rows.map(c=>{
+    const rf=riskFlags(c);
+    const cls=rf.high?'ALTO RISCO':rf.attention?'ATENÇÃO':'NORMAL';
+    const clsTag=rf.high?'t-crit':'t-att';
+    const adjDesc=getAdjustedDesc(c);
+    return `<tr>
+      <td class="tb">${c.id}</td><td>${c.seg}</td><td>${c.setor}</td><td>${c.reg}</td>
+      <td><span class="tag ${ratingCls(c.rating)}">${c.rating}</span></td>
+      <td class="tb">${getAdjustedScore(c)}</td>
+      <td><div class="pw"><div class="pb"><div class="pf ${utilCls(c.util)}" style="width:${Math.min(c.util,100)}%"></div></div><span class="pv">${c.util.toFixed(1).replace('.',',')}%</span></div></td>
+      <td>${adjDesc!=null?adjDesc.toFixed(1).replace('.',',')+'%':'—'}</td>
+      <td class="tb">${c.exp>0?c.exp.toFixed(2).replace('.',','):'—'}</td>
+      <td><span class="tag ${clsTag}">${cls}</span></td>
+    </tr>`;
+  }).join('');
+}
+function updateVencidasTable(){
+  const tbody=document.getElementById('vencidas-tbody'); if(!tbody) return;
+  const rows=getVencidas();
+  if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="8">Nenhuma operação vencida no recorte selecionado.</td></tr>'; return;}
+  const dT=d=>d>365?'t-crit':d>90?'t-att':'t-info';
+  const pT=p=>p.startsWith('1')?'t-crit':p.startsWith('2')?'t-att':p.startsWith('3')?'t-info':'t-gray';
+  tbody.innerHTML=rows.map(r=>`<tr>
+    <td class="tb">${r.id}</td><td>${r.setor}</td><td>${r.prod}</td><td class="tb">${r.val.toFixed(2).replace('.',',')}</td>
+    <td><span class="tag ${dT(r.dias)}">${r.dias}d</span></td><td><span class="tag t-info">${r.rating}</span></td>
+    <td>${r.pd.toFixed(2).replace('.',',')}%</td><td><span class="tag ${pT(r.pri)}">${r.pri}</span></td>
+  </tr>`).join('');
+}
+function updateCrisisTable(){
+  const tbody=document.getElementById('crise-tbody'); if(!tbody) return;
+  const rows=getCrisisRows();
+  if(!rows.length){tbody.innerHTML='<tr class="empty-row"><td colspan="6">Nenhum cliente do cenário hipotético atende ao recorte selecionado.</td></tr>'; return;}
+  tbody.innerHTML=rows.map(r=>`<tr>
+    <td class="tb">${r.id}</td><td><span class="tag ${['BBB','BBB-'].includes(r.rating)?'t-att':'t-crit'}">${r.rating}</span></td>
+    <td>${r.util.toFixed(1).replace('.',',')}%</td><td>${r.desc.toFixed(1).replace('.',',')}%</td>
+    <td class="tb">${r.exp.toFixed(0)}</td><td><span class="tag ${r.status==='Crítico'?'t-crit':'t-att'}">${r.status}</span></td>
+  </tr>`).join('');
+}
+function updateScoreChart(clients){
+  upd('cScoreEvol',ch=>{
+    const labels=MONTHS_ALL.slice(pc().start);
+    const entries=getScoreSeriesEntries(clients);
+    ch.data.labels=labels;
+    ch.data.datasets=entries.map(({seg,data})=>({
+      label:seg,data:data.slice(pc().start),
+      borderColor:seg==='Corporate'?C.NAVY_LT:seg==='Wholesale'?C.ORANGE:C.GRAY,
+      backgroundColor:(seg==='Corporate'?C.NAVY_LT:seg==='Wholesale'?C.ORANGE:C.GRAY)+'15',
+      tension:.35,pointRadius:3,borderWidth:2,borderDash:seg==='Corporate'?[4,2]:[]
+    }));
+  });
+}
+function updateSegDonut(clients){
+  const segs=['Corporate','Wholesale','Middle Market'];
+  const vals=segs.map(s=>{
+    const rows=clients.filter(c=>c.seg===s);
+    const base=sum(rows.map(c=>c.exp||0));
+    return base*getSegmentExposurePeriodFactor(s);
+  });
+  upd('cSegDonut',ch=>{ch.data.datasets[0].data=vals;});
+  setText('leg-corp',fmt(vals[0])); setText('leg-whole',fmt(vals[1])); setText('leg-mid',fmt(vals[2]));
+}
+function updateSectorBar(clients){
+  const sd=getSectorData(clients);
+  upd('cSetorBar',ch=>{
+    ch.data.labels=sd.map(x=>x.setor);
+    ch.data.datasets[0].data=sd.map(x=>+(x.pct.toFixed(1)));
+    ch.data.datasets[0].backgroundColor=sd.map(x=>x.pct>15?C.RED+'CC':x.pct>10?C.ORANGE+'CC':C.NAVY_MID+'CC');
+  });
+}
+function updateRatingChart(clients){
+  const labels=['AAA','AA+','AA','AA-','A+','A','A-','BBB+','BBB','BBB-','BB+','BB','BB-','B+','B','B-','C'];
+  const inv=['AAA','AA+','AA','AA-','A+','A','A-']; const med=['BBB+','BBB','BBB-'];
+  const map=Object.fromEntries(labels.map(l=>[l,0])); clients.forEach(c=>{if(map[c.rating]!==undefined) map[c.rating]++;});
+  upd('cRatingDist',ch=>{ch.data.datasets[0].data=labels.map(l=>map[l]); ch.data.datasets[0].backgroundColor=labels.map(r=>inv.includes(r)?C.GREEN+'CC':med.includes(r)?C.ORANGE+'CC':C.RED+'CC');});
+}
+function updateClassifProvCharts(clients){
+  const buckets=[0,0,0,0];
+  clients.forEach(c=>{buckets[getAdjustedBucket(c)]+=((c.exp||0)*pc().factor);});
+  upd('cClassifRisco',ch=>{ch.data.datasets[0].data=buckets.map(v=>+(v/1000).toFixed(2));});
+  setText('leg-classif-high',fmt(buckets[0]));
+  setText('leg-classif-mid',fmt(buckets[1]));
+  setText('leg-classif-spec',fmt(buckets[2]));
+  setText('leg-classif-risk',fmt(buckets[3]));
+  const hasAnyFilter=!!(STATE.seg||STATE.setor||STATE.reg||STATE.period!=='12m');
+  const provBySeg=hasAnyFilter
+    ? ['Corporate','Wholesale','Middle Market'].map(seg=>{
+        const rows=clients.filter(c=>c.seg===seg);
+        const desc=sum(rows.filter(c=>getAdjustedDesc(c)!=null).map(c=>(c.exp||0)*(getAdjustedDesc(c)/100)))*pc().factor;
+        const pdSeg=avg(rows.map(c=>getAdjustedPd(c)))/100;
+        return +(desc*pdSeg).toFixed(1);
+      })
+    : [47.0,31.0,3.1];
+  upd('cProvSegmento',ch=>{ch.data.datasets[0].data=provBySeg;});
+}
+function updateScatter(clients){
+  const pts=clients.filter(c=>riskFlags(c).attention || riskFlags(c).high).map(c=>({
+    x:c.util,y:(c.desc||0),id:c.id,cls:riskFlags(c).high?'Alto Risco':'Atenção'
+  }));
+  upd('cScatter',ch=>{
+    ch.data.datasets[0].data=pts;
+    ch.data.datasets[0].backgroundColor=pts.map(p=>p.cls==='Alto Risco'?C.RED+'AA':C.ORANGE+'AA');
+  });
+}
+function updateRiskDonut(clients){
+  const all=clients.map(c=>riskFlags(c));
+  const high=all.filter(f=>f.high).length, att=all.filter(f=>f.attention&&!f.high).length, norm=Math.max(clients.length-high-att,0);
+  upd('cRiskDonut',ch=>{ch.data.datasets[0].data=[norm,att,high]});
+  setText('leg-att',`${att} clientes`); setText('leg-high',`${high} clientes`); setText('leg-norm',`${norm} clientes`);
+}
+function updateMigracao(clients){
+  const amp=STATE.period==='3m'?0.7:STATE.period==='6m'?0.85:STATE.period==='all'?1.15:1;
+  const trends=clients.map(c=>{
+    const desc=(c.desc==null?25:c.desc);
+    return (((c.util-70)/10)+((desc-25)/6)+((780-c.score)/45)+ratingBucket(c.rating)-1)*amp;
+  });
+  const melhora=trends.filter(v=>v<-0.45).length;
+  const piora=trends.filter(v=>v>1.1).length;
+  const estavel=Math.max(clients.length-melhora-piora,0);
+  upd('cMigracao',ch=>{ch.data.datasets[0].data=[melhora,estavel,piora]});
+  const intensity=trends.map(v=>Math.abs(v));
+  const sem=intensity.filter(v=>v<0.4).length;
+  const leve=intensity.filter(v=>v>=0.4&&v<1.2).length;
+  const mod=intensity.filter(v=>v>=1.2&&v<2.1).length;
+  const sig=intensity.filter(v=>v>=2.1).length;
+  upd('cIntensidade',ch=>{ch.data.datasets[0].data=[sem,leve,mod,sig]});
+}
+function updatePerformance(clients,kpis){
+  const prodMix=buildProductMix(clients,kpis);
+  upd('cProdBar',ch=>{
+    ch.data.labels=prodMix.labels;
+    ch.data.datasets[0].data=prodMix.aprov;
+    ch.data.datasets[1].data=prodMix.util;
+  });
+  upd('cUtilHist',ch=>{ch.data.datasets[0].data=[clients.filter(c=>c.util<50).length,clients.filter(c=>c.util>=50&&c.util<60).length,clients.filter(c=>c.util>=60&&c.util<70).length,clients.filter(c=>c.util>=70&&c.util<75).length,clients.filter(c=>c.util>=75&&c.util<80).length,clients.filter(c=>c.util>=80&&c.util<85).length,clients.filter(c=>c.util>=85).length]});
+  const top=[...clients].sort((a,b)=>b.util-a.util).slice(0,5);
+  upd('cTopUtil',ch=>{ch.data.labels=top.map(r=>r.id); ch.data.datasets[0].data=top.map(r=>r.util); ch.data.datasets[0].backgroundColor=top.map(r=>r.util>85?C.RED+'CC':C.ORANGE+'CC');});
+  const display=getSegLabels(clients).filter(seg=>clients.some(c=>c.seg===seg));
+  const garantiaMix=display.map(seg=>getGarantiaMix(clients.filter(c=>c.seg===seg),seg));
+  upd('cGarantias',ch=>{
+    ch.data.labels=display;
+    ch.data.datasets[0].data=garantiaMix.map(v=>v.forte);
+    ch.data.datasets[1].data=garantiaMix.map(v=>v.moderada);
+    ch.data.datasets[2].data=garantiaMix.map(v=>v.sem);
+  });
+}
+function updateStatsCharts(clients){
+  upd('cPercentis',ch=>{
+    const labels=getSegLabels(clients).filter(seg=>clients.some(c=>c.seg===seg));
+    ch.data.labels=labels;
+    ch.data.datasets[0].data=labels.map(s=>Math.round(percentile(clients.filter(c=>c.seg===s).map(c=>c.score),0.25)));
+    ch.data.datasets[1].data=labels.map(s=>Math.round(percentile(clients.filter(c=>c.seg===s).map(c=>c.score),0.50)));
+    ch.data.datasets[2].data=labels.map(s=>Math.round(percentile(clients.filter(c=>c.seg===s).map(c=>c.score),0.75)));
+    ch.data.datasets[3].data=labels.map(s=>Math.round(percentile(clients.filter(c=>c.seg===s).map(c=>c.score),0.95)));
+  });
+  upd('cMA3',ch=>{
+    const labels=MONTHS_ALL.slice(pc().start);
+    const entries=getScoreSeriesEntries(clients);
+    ch.data.labels=labels;
+    ch.data.datasets=entries.map(({seg,data})=>({
+      label:seg,data:movingAverage3(data).slice(pc().start),
+      borderColor:seg==='Corporate'?C.NAVY_LT:seg==='Wholesale'?C.ORANGE:C.GRAY,
+      backgroundColor:'transparent',tension:.35,pointRadius:2,borderWidth:2
+    }));
+  });
+  upd('cVolatilidade',ch=>{
+    const labels=getSegLabels(clients).filter(seg=>clients.some(c=>c.seg===seg));
+    ch.data.labels=labels;
+    ch.data.datasets[0].data=labels.map(s=>{
+      const entry=getScoreSeriesEntries(clients).find(item=>item.seg===s);
+      if(!entry) return 0;
+      const series=entry.data.slice(pc().start);
+      const diffs=series.slice(1).map((v,i)=>v-series[i]);
+      return +stddev(diffs).toFixed(1);
+    });
+    ch.data.datasets[0].backgroundColor=labels.map(s=>s==='Corporate'?C.NAVY_MID+'CC':s==='Wholesale'?C.ORANGE+'CC':C.GRAY+'CC');
+  });
+}
+function updateCrisisCharts(){
+  updateCrisisTable();
+  const rows=getCrisisRows();
+  const startIdx=getCrisisStartIndex();
+  upd('cCrisisRating',ch=>{
+    ch.data.labels=CRISE_MESES.slice(startIdx);
+    ch.data.datasets=rows.map((row,i)=>({
+      label:row.id,data:buildCrisisSeries(row).slice(startIdx),borderColor:[C.NAVY_MID,C.ORANGE,C.GREEN,C.RED,C.BLUE,C.GRAY,C.YELLOW][i%7],
+      backgroundColor:'transparent',tension:.3,pointRadius:2,borderWidth:2
+    }));
+  });
+  upd('cCrisisPcld',ch=>{
+    const baseDesc=sum(rows.map(r=>r.exp*(r.desc/100)))*(STATE.period==='3m'?0.45:STATE.period==='6m'?0.75:1);
+    const severity=rows.length?avg(rows.map(r=>((r.util-75)/15)+(ratingBucket(r.rating)*0.45)+((r.desc-30)/10))):0;
+    const multipliers=[0.10,0.20,0.30];
+    ch.data.datasets[0].data=multipliers.map(m=>+(baseDesc*m*Math.max(1,severity)).toFixed(1));
+  });
+}
+function updateAll(){
+  const clients=getClients(), kpis=computeKPIs(clients);
+  updateTexts(clients,kpis); updateKPIs(clients,kpis); updateAlerts(clients,kpis);
+  updateRiskTable(clients); updateVencidasTable();
+  updateClassifProvCharts(clients); updateScoreChart(clients); updateSegDonut(clients); updateSectorBar(clients); updateRatingChart(clients);
+  updateScatter(clients); updateRiskDonut(clients); updateMigracao(clients); updatePerformance(clients,kpis); updateStatsCharts(clients); updateCrisisCharts();
+}
+function applyFilters(){STATE.seg=document.getElementById('flt-seg').value; STATE.setor=document.getElementById('flt-setor').value; STATE.reg=document.getElementById('flt-reg').value; updateAll();}
+function setPeriod(period,btn){STATE.period=period; document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active')); if(btn) btn.classList.add('active'); updateAll();}
+function switchTab(index){document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===index)); document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===index));}
+function resetFilters(){STATE.seg='';STATE.setor='';STATE.reg='';STATE.period='12m'; document.getElementById('flt-seg').value=''; document.getElementById('flt-setor').value=''; document.getElementById('flt-reg').value=''; document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active')); document.querySelector('.period-btn[data-period="12m"]').classList.add('active'); updateAll();}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  setText('hdr-ref','Fev/2026');
+  const now=new Date();
+  setText('hdr-upd',`${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`);
+  Chart.register(emptyStatePlugin);
+  initCharts();
+  updateAll();
+});
+</script>
+</body>
+</html>

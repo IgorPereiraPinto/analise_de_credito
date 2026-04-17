@@ -1,0 +1,16 @@
+# credito_bba — Dependências de produção
+# Instale com: pip install -r requirements.txt
+
+# Manipulação de dados
+pandas>=2.0.0
+openpyxl>=3.1.0
+numpy>=1.26.0
+
+# Conexão com bancos
+pyodbc>=5.0.0          # SQL Server
+boto3>=1.34.0          # AWS (S3, Athena)
+pyathena>=3.0.0        # Athena query direto via Python
+
+# Utilitários
+python-dotenv>=1.0.0   # Leitura do .env
+loguru>=0.7.0          # Logging estruturado
