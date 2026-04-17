@@ -85,7 +85,6 @@ credito_bba/
 │   │
 │   └── athena/                        ← implementação Athena (AWS)
 │       ├── 00_ddl_external.sql        ← tabelas externas (S3 + Glue)
-│       ├── 01_raw_s3.sql              ← referências ao dado no S3
 │       ├── 02_stage_views.sql         ← views de limpeza e enriquecimento
 │       ├── 03_dw_views.sql            ← modelo dimensional e KPIs
 │       ├── 04_queries_analiticas.sql  ← queries do case adaptadas para Athena

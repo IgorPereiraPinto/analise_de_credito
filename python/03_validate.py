@@ -6,8 +6,10 @@ Aplica validações de integridade e regras de negócio do domínio de crédito.
 Gera relatório de inconsistências em data/processed/validation_report.csv.
 
 Para reutilizar em outro case:
-  - ajuste VALIDATION_RULES com as regras do novo domínio
-  - severidade "error" remove a linha; "warning" apenas registra
+  - adicione ou remova blocos de validação dentro de validate_all()
+  - severidade "error" remove a linha do DataFrame; "warning" apenas registra
+  - as regras estão implementadas como blocos if/mask explícitos — não há dicionário
+    de configuração externo; legibilidade foi priorizada sobre parametrização
 """
 
 import os

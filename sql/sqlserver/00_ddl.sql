@@ -98,8 +98,9 @@ CREATE TABLE limites (
 -- ----------------------------------------------------------------
 -- Tabela 5: exposicoes — posição consolidada mensal por cliente
 -- PK: (cliente_id, data_referencia)
--- Nota: provisao_necessaria e classificacao_risco foram adicionados
---       para suportar os KPIs da camada DW sem joins adicionais.
+-- RAW = dado fiel à fonte: apenas os 5 campos que chegam do Excel.
+-- classificacao_risco e provisao_necessaria são campos derivados
+-- calculados na camada STAGE (vw_stage_exposicao_recente), não aqui.
 -- ----------------------------------------------------------------
 CREATE TABLE exposicoes (
     cliente_id            VARCHAR(10)   NOT NULL,
@@ -107,8 +108,6 @@ CREATE TABLE exposicoes (
     exposicao_total       DECIMAL(15,2),
     exposicao_garantida   DECIMAL(15,2),
     exposicao_descoberta  DECIMAL(15,2),
-    provisao_necessaria   DECIMAL(15,2),
-    classificacao_risco   VARCHAR(2),
     CONSTRAINT pk_exposicoes PRIMARY KEY (cliente_id, data_referencia),
     CONSTRAINT fk_exposicoes_clientes FOREIGN KEY (cliente_id)
         REFERENCES clientes (cliente_id)

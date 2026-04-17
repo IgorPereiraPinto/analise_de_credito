@@ -41,12 +41,26 @@ GO
 -- STAGE 2: vw_stage_exposicao_recente
 -- Última posição de exposição por cliente (data_referencia = MAX)
 -- Base para todos os KPIs de snapshot de carteira
+--
+-- classificacao_risco e provisao_necessaria são derivados aqui na
+-- camada STAGE a partir de score_interno (ratings) — não vêm do RAW.
+-- Isso preserva o princípio de que RAW = dado fiel à fonte.
 -- ----------------------------------------------------------------
 CREATE OR ALTER VIEW vw_stage_exposicao_recente AS
 WITH ultima_data AS (
     SELECT cliente_id, MAX(data_referencia) AS data_ref_max
     FROM exposicoes
     GROUP BY cliente_id
+),
+ultimo_score AS (
+    SELECT r.cliente_id, r.score_interno
+    FROM ratings r
+    INNER JOIN (
+        SELECT cliente_id, MAX(data_referencia) AS data_ref_max
+        FROM ratings
+        GROUP BY cliente_id
+    ) ur ON r.cliente_id = ur.cliente_id
+         AND r.data_referencia = ur.data_ref_max
 )
 SELECT
     e.cliente_id,
@@ -54,14 +68,32 @@ SELECT
     e.exposicao_total,
     e.exposicao_garantida,
     e.exposicao_descoberta,
-    e.provisao_necessaria,
-    e.classificacao_risco,
     ROUND(e.exposicao_descoberta / NULLIF(e.exposicao_total, 0) * 100, 1)
-        AS pct_exposicao_descoberta
+        AS pct_exposicao_descoberta,
+    -- classificacao_risco: derivada do score_interno (não armazenada em RAW)
+    CASE
+        WHEN s.score_interno >= 850 THEN 'AA'
+        WHEN s.score_interno >= 750 THEN 'A'
+        WHEN s.score_interno >= 650 THEN 'BBB'
+        WHEN s.score_interno >= 550 THEN 'BB'
+        WHEN s.score_interno >= 450 THEN 'B'
+        ELSE                             'C'
+    END AS classificacao_risco,
+    -- provisao_necessaria: % da exposicao_total por faixa de risco (referência CMN 2.682)
+    ROUND(e.exposicao_total * CASE
+        WHEN s.score_interno >= 850 THEN 0.000
+        WHEN s.score_interno >= 750 THEN 0.005
+        WHEN s.score_interno >= 650 THEN 0.010
+        WHEN s.score_interno >= 550 THEN 0.030
+        WHEN s.score_interno >= 450 THEN 0.100
+        ELSE                             0.300
+    END, 2) AS provisao_necessaria
 FROM exposicoes e
 INNER JOIN ultima_data ud
     ON e.cliente_id = ud.cliente_id
-   AND e.data_referencia = ud.data_ref_max;
+   AND e.data_referencia = ud.data_ref_max
+LEFT JOIN ultimo_score s
+    ON e.cliente_id = s.cliente_id;
 GO
 
 -- ----------------------------------------------------------------

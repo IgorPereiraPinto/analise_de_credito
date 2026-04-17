@@ -99,15 +99,16 @@ TBLPROPERTIES ('parquet.compress' = 'SNAPPY');
 
 -- ----------------------------------------------------------------
 -- Tabela 5: exposicoes
+-- RAW = dado fiel à fonte: apenas os 5 campos que chegam do Excel.
+-- classificacao_risco e provisao_necessaria são campos derivados
+-- calculados na camada STAGE (vw_stage_exposicao_recente), não aqui.
 -- ----------------------------------------------------------------
 CREATE EXTERNAL TABLE IF NOT EXISTS credito_ibba.exposicoes (
     cliente_id            STRING,
     data_referencia       DATE,
     exposicao_total       DECIMAL(15,2),
     exposicao_garantida   DECIMAL(15,2),
-    exposicao_descoberta  DECIMAL(15,2),
-    provisao_necessaria   DECIMAL(15,2),
-    classificacao_risco   STRING
+    exposicao_descoberta  DECIMAL(15,2)
 )
 STORED AS PARQUET
 LOCATION 's3://bucket-credito/trusted/exposicoes/'

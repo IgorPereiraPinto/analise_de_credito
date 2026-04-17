@@ -36,6 +36,12 @@ SQLSERVER_USER=seu_usuario
 SQLSERVER_PASSWORD=sua_senha
 ```
 
+> **Nota sobre o nome do banco:** `credito_ibba` é o nome do banco de dados definido no DDL,
+> derivado do case original (Itaú BBA/IBBA). O repositório chama-se `credito_bba`.
+> Para adaptar a outro contexto, troque `credito_ibba` por `credito_bba` (ou outro nome)
+> nos arquivos `sql/sqlserver/00_ddl.sql` e `sql/sqlserver/02_stage_views.sql` — ou
+> simplesmente mantenha `credito_ibba` como nome do banco sem impacto funcional.
+
 ### 2. Copiar o Excel para data/raw/
 
 ```bash

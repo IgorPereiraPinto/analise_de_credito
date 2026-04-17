@@ -35,12 +35,24 @@ UNION ALL SELECT 'C',    1;
 
 -- ----------------------------------------------------------------
 -- STAGE 2: última exposição por cliente
+-- classificacao_risco e provisao_necessaria derivados aqui (STAGE),
+-- não armazenados em RAW — mantém RAW fiel à fonte.
 -- ----------------------------------------------------------------
 CREATE OR REPLACE VIEW credito_ibba.vw_stage_exposicao_recente AS
 WITH ultima_data AS (
     SELECT cliente_id, MAX(data_referencia) AS data_ref_max
     FROM credito_ibba.exposicoes
     GROUP BY cliente_id
+),
+ultimo_score AS (
+    SELECT r.cliente_id, r.score_interno
+    FROM credito_ibba.ratings r
+    INNER JOIN (
+        SELECT cliente_id, MAX(data_referencia) AS data_ref_max
+        FROM credito_ibba.ratings
+        GROUP BY cliente_id
+    ) ur ON r.cliente_id = ur.cliente_id
+         AND r.data_referencia = ur.data_ref_max
 )
 SELECT
     e.cliente_id,
@@ -48,14 +60,30 @@ SELECT
     e.exposicao_total,
     e.exposicao_garantida,
     e.exposicao_descoberta,
-    e.provisao_necessaria,
-    e.classificacao_risco,
     ROUND(e.exposicao_descoberta / NULLIF(e.exposicao_total, 0) * 100, 1)
-        AS pct_exposicao_descoberta
+        AS pct_exposicao_descoberta,
+    CASE
+        WHEN s.score_interno >= 850 THEN 'AA'
+        WHEN s.score_interno >= 750 THEN 'A'
+        WHEN s.score_interno >= 650 THEN 'BBB'
+        WHEN s.score_interno >= 550 THEN 'BB'
+        WHEN s.score_interno >= 450 THEN 'B'
+        ELSE                             'C'
+    END AS classificacao_risco,
+    ROUND(e.exposicao_total * CASE
+        WHEN s.score_interno >= 850 THEN 0.000
+        WHEN s.score_interno >= 750 THEN 0.005
+        WHEN s.score_interno >= 650 THEN 0.010
+        WHEN s.score_interno >= 550 THEN 0.030
+        WHEN s.score_interno >= 450 THEN 0.100
+        ELSE                             0.300
+    END, 2) AS provisao_necessaria
 FROM credito_ibba.exposicoes e
 INNER JOIN ultima_data ud
     ON e.cliente_id = ud.cliente_id
-   AND e.data_referencia = ud.data_ref_max;
+   AND e.data_referencia = ud.data_ref_max
+LEFT JOIN ultimo_score s
+    ON e.cliente_id = s.cliente_id;
 
 -- ----------------------------------------------------------------
 -- STAGE 3: último rating por cliente

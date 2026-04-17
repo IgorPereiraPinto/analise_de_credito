@@ -42,8 +42,8 @@ Execute sempre nesta sequência. Cada script depende da saída do anterior.
 **O que faz:** recebe os DataFrames brutos e aplica limpeza e padronização:
 - converte tipos (string → date, string → decimal)
 - normaliza strings (strip, upper/lower conforme campo)
-- trata nulos com estratégia explícita por campo
-- remove linhas completamente vazias
+- trata nulos com estratégia explícita por campo (`drop`, `fill_zero`, `fill_unknown`)
+- remove linhas duplicadas (`drop_duplicates`)
 
 **Etapa no pipeline:** Silver — dado limpo, ainda sem regra de negócio.
 
@@ -74,8 +74,9 @@ Execute sempre nesta sequência. Cada script depende da saída do anterior.
 **Etapa no pipeline:** ponto de controle entre Silver e Gold.
 
 **Parâmetros para reutilização:**
-- `VALIDATION_RULES`: lista de regras, cada uma com nome, tabela, condição e severidade
-- Para um novo case: substitua ou estenda as regras no dicionário
+- As validações estão implementadas como funções na seção `validate_all()`
+- Para um novo case: adicione ou remova blocos de validação diretamente no script
+- Cada regra declara tabela, condição, severidade (`error` remove a linha, `warning` registra)
 
 **Saída:**
 - DataFrames validados (linhas com erro severo removidas)
@@ -109,7 +110,7 @@ Execute sempre nesta sequência. Cada script depende da saída do anterior.
 1. Copie a pasta `python/` inteira para o novo projeto
 2. Em `01_extract.py`, ajuste `EXPECTED_SHEETS` com as abas e colunas do novo Excel
 3. Em `02_clean.py`, ajuste `DTYPE_MAP` e `NULL_STRATEGY` para os campos do novo domínio
-4. Em `03_validate.py`, ajuste `VALIDATION_RULES` com as regras de negócio do novo case
+4. Em `03_validate.py`, adicione ou remova blocos de validação na função `validate_all()`
 5. `04_export.py` geralmente não precisa de ajuste — funciona com qualquer conjunto de tabelas
 
 ---

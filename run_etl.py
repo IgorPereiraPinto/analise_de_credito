@@ -1,4 +1,10 @@
-"""Runner do pipeline ETL completo — executa os 4 scripts em sequência."""
+"""Runner do pipeline ETL completo — executa os 4 scripts em sequência.
+
+Os scripts em python/ são carregados via importlib em vez de import direto porque
+o projeto não tem __init__.py (não é um pacote instalável). Essa abordagem permite
+executar `python run_etl.py` da raiz do projeto sem setup adicional, mantendo cada
+script também executável de forma independente com `python python/01_extract.py`.
+"""
 import importlib.util
 import sys
 import types
