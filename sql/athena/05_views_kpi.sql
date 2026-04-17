@@ -7,6 +7,9 @@
 --
 -- No QuickSight: cada view é um Dataset.
 --   Crie um Dataset por view e use-os nos visuais diretamente.
+--
+-- Nota técnica : Script convertido a partir da versão SQL Server (sql/sqlserver/).
+--               Sintaxe adaptada para Athena/Presto — lógica analítica equivalente.
 -- ================================================================
 
 -- KPI 1: Exposição consolidada do portfólio

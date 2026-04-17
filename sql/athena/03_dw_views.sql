@@ -4,6 +4,9 @@
 -- Camada    : DW (Gold)
 -- Objetivo  : Equivalente a sql/sqlserver/03_dw_views.sql,
 --             adaptado para sintaxe Athena.
+--
+-- Nota técnica : Script convertido a partir da versão SQL Server (sql/sqlserver/).
+--               Sintaxe adaptada para Athena/Presto — lógica analítica equivalente.
 -- ================================================================
 
 -- ----------------------------------------------------------------

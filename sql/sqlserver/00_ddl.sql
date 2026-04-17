@@ -11,6 +11,9 @@
 --   permite — diferente do Athena, onde não existem FKs nativas.
 --
 -- Executar antes de: 01_raw_insert.sql
+--
+-- Nota técnica : Queries escritas em SQL Server para prototipagem local.
+--               Versão convertida para Amazon Athena disponível em sql/athena/
 -- ================================================================
 
 CREATE DATABASE credito_ibba;

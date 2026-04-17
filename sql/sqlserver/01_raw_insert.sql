@@ -10,6 +10,9 @@
 --
 -- Opção A (SSMS): usar o Import Flat File Wizard ou BULK INSERT
 -- Opção B (Python): usar pyodbc com pandas.to_sql() — recomendado
+--
+-- Nota técnica : Queries escritas em SQL Server para prototipagem local.
+--               Versão convertida para Amazon Athena disponível em sql/athena/
 -- ================================================================
 
 USE credito_ibba;

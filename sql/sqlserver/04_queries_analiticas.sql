@@ -7,6 +7,9 @@
 --             e insight de negócio derivado.
 --
 -- Pré-requisito: 03_dw_views.sql executado com sucesso
+--
+-- Nota técnica : Queries escritas em SQL Server para prototipagem local.
+--               Versão convertida para Amazon Athena disponível em sql/athena/
 -- ================================================================
 
 USE credito_ibba;

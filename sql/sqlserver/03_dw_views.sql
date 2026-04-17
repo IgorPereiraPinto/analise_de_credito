@@ -13,6 +13,9 @@
 --   Nenhuma lógica de limpeza aqui — apenas cálculo e apresentação.
 --
 -- Pré-requisito: 02_stage_views.sql executado com sucesso
+--
+-- Nota técnica : Queries escritas em SQL Server para prototipagem local.
+--               Versão convertida para Amazon Athena disponível em sql/athena/
 -- ================================================================
 
 USE credito_ibba;

@@ -13,6 +13,9 @@
 --   DATEDIFF(DAY,d1,d2)   → DATE_DIFF('day', d1, d2)
 --   PERCENTILE_CONT WITHIN GROUP → APPROX_PERCENTILE(col, p)
 --   CONCAT(a,b)           → CONCAT(a,b) (igual)
+--
+-- Nota técnica : Script convertido a partir da versão SQL Server (sql/sqlserver/).
+--               Sintaxe adaptada para Athena/Presto — lógica analítica equivalente.
 -- ================================================================
 
 -- ================================================================

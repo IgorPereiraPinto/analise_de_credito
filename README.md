@@ -182,6 +182,15 @@ Instruções detalhadas estão em [docs/como_executar.md](docs/como_executar.md)
 
 ---
 
+## Nota técnica — SQL Server e Amazon Athena
+
+> As queries SQL foram escritas originalmente em **SQL Server** para prototipagem e validação local.
+> O script completo foi convertido para **Amazon Athena**, mantendo equivalência funcional.
+> Ambas as implementações estão disponíveis neste repositório — a escolha do ambiente depende
+> da infraestrutura disponível, não da lógica analítica.
+
+---
+
 ## Dualidade SQL Server / Athena
 
 O projeto mantém duas implementações paralelas e funcionais:
@@ -218,39 +227,3 @@ Guia completo de reutilização: [roadmap/14_como_reutilizar_o_projeto.md](roadm
 **Igor Pereira Pinto**
 Analista de Dados / BI e Planejamento Comercial Sênior
 [github.com/IgorPereiraPinto](https://github.com/IgorPereiraPinto)
-
-## Objetivo
-
-Centralizar uma estrutura reutilizável para projetos analíticos e técnicos, permitindo que o Claude Code atue com mais consistência, contexto e especialização.
-
-Este repositório foi pensado para apoiar demandas como:
-- análise de dados e BI
-- planejamento comercial e procurement
-- SQL, Python e Power BI
-- dashboards web em HTML
-- Microsoft Fabric, AWS e dbt
-- automações e integrações
-- prompts, skills e documentação técnica
-
-## Como este repositório está organizado
-
-```text
-claude-code-setup/
-├── CLAUDE.md
-├── README.md
-├── SKILLS_GUIDE.md
-├── AGENTS_GUIDE.md
-├── COMMANDS_GUIDE.md
-└── .claude/
-    ├── rules/
-    ├── skills/
-    ├── agents/
-    └── commands/
-
-## Status da versão
-
-**Versão atual: 1.0**
-
-A versão 1.0 deste repositório consolida uma base estruturada para uso com Claude Code, incluindo `CLAUDE.md`, guides de consulta, rules, skills, agents e commands alinhados a um contexto real de dados, BI, automação, dashboards, analytics engineering e comunicação executiva.
-
-O objetivo desta versão é servir como fundação reutilizável, consistente e escalável para futuros projetos, mantendo clareza de navegação, padronização técnica e especialização por tipo de tarefa.

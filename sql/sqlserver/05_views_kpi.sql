@@ -15,6 +15,9 @@
 --   vw_kpi_risco           → Pasta "4. Risco" (matriz de alertas)
 --
 -- Para QuickSight: use os mesmos arquivos da pasta athena/
+--
+-- Nota técnica : Queries escritas em SQL Server para prototipagem local.
+--               Versão convertida para Amazon Athena disponível em sql/athena/
 -- ================================================================
 
 USE credito_ibba;

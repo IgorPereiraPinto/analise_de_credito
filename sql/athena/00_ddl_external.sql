@@ -16,6 +16,9 @@
 --
 -- Para ajustar ao seu ambiente: substitua 's3://bucket-credito/'
 --   pelo nome real do seu bucket S3.
+--
+-- Nota técnica : Script convertido a partir da versão SQL Server (sql/sqlserver/).
+--               Sintaxe adaptada para Athena/Presto — lógica analítica equivalente.
 -- ================================================================
 
 -- Passo 1: Criar o banco no Glue Data Catalog

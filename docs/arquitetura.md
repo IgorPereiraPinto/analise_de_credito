@@ -55,6 +55,10 @@ _case.xlsx       02_clean.py   →    STAGE (Silver)        →   Power BI
 
 ## Dualidade SQL Server / Athena
 
+> **Nota técnica:** As queries SQL foram escritas originalmente em **SQL Server** para
+> prototipagem e validação local. O script completo foi convertido para **Amazon Athena**,
+> mantendo equivalência funcional entre os dois ambientes.
+
 As duas implementações são **funcionalmente equivalentes**. A diferença é o ambiente:
 
 | Dimensão           | SQL Server (local)             | Athena (AWS)                       |

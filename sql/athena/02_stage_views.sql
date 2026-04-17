@@ -13,6 +13,9 @@
 --   CREATE OR ALTER VIEW     →  CREATE OR REPLACE VIEW
 --
 -- No Athena, views são armazenadas no Glue Data Catalog.
+--
+-- Nota técnica : Script convertido a partir da versão SQL Server (sql/sqlserver/).
+--               Sintaxe adaptada para Athena/Presto — lógica analítica equivalente.
 -- ================================================================
 
 -- ----------------------------------------------------------------
