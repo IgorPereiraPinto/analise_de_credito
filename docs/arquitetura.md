@@ -7,27 +7,46 @@ deste projeto onde a fonte é um Excel e o destino é um banco relacional local 
 ou um Data Lake na AWS (Athena + S3).
 
 ```text
-[FONTE]          [PYTHON ETL]        [SQL — 3 CAMADAS]         [CONSUMO]
+[FONTE]      [PYTHON ETL — porta de qualidade]    [SQL — 3 CAMADAS]       [CONSUMO]
 
-Excel            01_extract.py  →    RAW (Bronze)
-dados_sinteticos               →    tabelas brutas
-_case.xlsx       02_clean.py   →    STAGE (Silver)        →   Power BI
-                               →    views enriquecidas        Amazon QuickSight
-                 03_validate.py →   DW (Gold)             →   Dashboard HTML
-                               →    views de KPI              Apresentação
-                 04_export.py  →    [carga CSV/Parquet]
+Excel        01_extract.py  →  validação de
+dados_sint.                    schema e abas
+             02_clean.py    →  tipagem, nulos,
+                               normalização
+             03_validate.py →  regras de negócio   RAW  ← landing SQL
+                               relatório de         │    (dado validado
+             04_export.py   →  CSV / Parquet   ─────┘     pelo ETL)
+                                                    ↓
+                                                   STAGE  →  Power BI
+                                                   (Silver)   QuickSight
+                                                    ↓
+                                                    DW    →  Dashboard HTML
+                                                   (Gold)     Apresentação
 ```
+
+> **Decisão arquitetural explícita:** a camada RAW do SQL recebe o output de `data/processed/`,
+> ou seja, dado já validado pelo Python ETL. O Python é a **porta de qualidade da fonte** —
+> lida com o que SQL não faz bem (leitura de Excel, coerção de tipos, validação de schema).
+> A partir do RAW SQL, vale a regra medallion: nenhuma transformação de negócio no RAW,
+> enriquecimento no STAGE, KPIs no DW. Para um pipeline com ingestão direta (sem ETL Python),
+> o RAW SQL poderia receber um dump literal da fonte — essa é a extensão natural do design.
 
 ---
 
 ## Camadas e responsabilidades
 
-### RAW (Bronze)
+### Python ETL — porta de qualidade
 
-- **O que contém:** dado exatamente como veio da fonte, sem transformação de negócio
+- **Papel:** extração e validação antes do SQL. Não é uma camada SQL, mas um pré-requisito.
+- **O que produz:** arquivos em `data/processed/` prontos para carga no banco
+- **Regra:** não aplica regras de negócio analíticas — só qualidade estrutural (schema, tipos, nulos)
+
+### RAW (Bronze / primeiro landing SQL)
+
+- **O que contém:** dado validado pelo ETL Python, sem transformações de negócio no SQL
 - **No SQL Server:** tabelas relacionais com PKs, FKs e índices
 - **No Athena:** tabelas externas apontando para Parquet no S3
-- **Regra de ouro:** nunca modifique o dado bruto nesta camada
+- **Regra:** a partir daqui nenhuma linha é removida ou modificada por SQL — apenas lida
 - **Arquivos:** `sql/sqlserver/00_ddl.sql`, `sql/sqlserver/01_raw_insert.sql`
 
 ### STAGE (Silver)

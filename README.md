@@ -22,15 +22,15 @@ Este repositório documenta, organiza e reproduz todo o processo, do dado bruto 
 Excel (dados_sinteticos_case.xlsx)
   │
   ▼
-[Python ETL]
-  01_extract.py        → lê o Excel, valida abas e schema mínimo
-  02_clean.py          → padroniza tipos, trata nulos, normaliza strings
-  03_validate.py       → aplica regras de negócio e gera relatório de qualidade
-  04_export.py         → exporta CSVs prontos para carga no banco
+[Python ETL — porta de qualidade da fonte]
+  01_extract.py   → lê o Excel, valida abas e schema mínimo
+  02_clean.py     → padroniza tipos, trata nulos, normaliza strings
+  03_validate.py  → aplica regras de negócio, gera validation_report.csv
+  04_export.py    → exporta para data/processed/ (CSV ou Parquet)
   │
+  ▼  data/processed/
   ▼
-[SQL — Camada RAW]
-  Dado bruto carregado sem transformação
+[SQL — Camada RAW] ← primeiro landing SQL (recebe output do ETL Python)
   SQL Server: tabelas relacionais com FK e PK
   Athena:     tabelas externas (Parquet no S3)
   │
@@ -145,11 +145,14 @@ pip install -r requirements.txt
 cp .env.example .env
 # edite o .env com seus dados de conexão
 
-# 5. Execute o ETL Python (na ordem)
-python python/01_extract.py
-python python/02_clean.py
-python python/03_validate.py
-python python/04_export.py
+# 5. Execute o ETL Python — forma recomendada (pipeline completo)
+python run_etl.py
+
+# Alternativa: executar script a script (útil para debug ou execução parcial)
+# python python/01_extract.py
+# python python/02_clean.py
+# python python/03_validate.py
+# python python/04_export.py
 
 # 6. Execute o SQL na ordem indicada em sql/sqlserver/ ou sql/athena/
 ```
@@ -218,6 +221,15 @@ Este repositório foi construído para ser portável. Para adaptar a outro conte
 4. Re-execute o pipeline na ordem indicada no `roadmap/`
 
 Guia completo de reutilização: [roadmap/14_como_reutilizar_o_projeto.md](roadmap/14_como_reutilizar_o_projeto.md)
+
+---
+
+## Infraestrutura de desenvolvimento
+
+Os arquivos `CLAUDE.md`, `AGENTS_GUIDE.md`, `COMMANDS_GUIDE.md`, `SKILLS_GUIDE.md` e o
+diretório `.claude/` são configurações do [Claude Code](https://claude.ai/code) usadas
+durante o desenvolvimento do projeto — não fazem parte do case de crédito em si.
+Podem ser ignorados ou removidos ao reutilizar este repositório em outro contexto.
 
 ---
 

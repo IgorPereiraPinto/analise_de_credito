@@ -1,9 +1,16 @@
 -- ================================================================
 -- credito_bba | SQL Server — Camada RAW: Carga de dados
 -- Arquivo   : 01_raw_insert.sql
--- Camada    : RAW
--- Objetivo  : Carregar os CSVs gerados pelo Python ETL nas tabelas
---             RAW. Dado bruto, sem transformação.
+-- Camada    : RAW (primeiro landing SQL)
+-- Objetivo  : Carregar os CSVs de data/processed/ nas tabelas RAW.
+--
+-- Nota de arquitetura:
+--   Os CSVs vêm de data/processed/, ou seja, do output do Python ETL
+--   (já validados por 01_extract → 02_clean → 03_validate).
+--   O Python é a porta de qualidade da fonte; a partir do RAW SQL
+--   nenhuma linha é removida ou alterada por SQL — apenas lida.
+--   Essa separação é intencional: Python lida com Excel/schema/tipos;
+--   SQL lida com joins, window functions e camada semântica.
 --
 -- Pré-requisito : 00_ddl.sql executado com sucesso
 --                 CSVs disponíveis em data/processed/

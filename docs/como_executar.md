@@ -51,6 +51,14 @@ data/raw/dados_sinteticos_case.xlsx
 
 ### 3. Executar o ETL Python
 
+**Forma recomendada — pipeline completo:**
+
+```bash
+python run_etl.py
+```
+
+**Alternativa — script a script** (útil para debug ou reexecução parcial):
+
 ```bash
 python python/01_extract.py
 python python/02_clean.py
