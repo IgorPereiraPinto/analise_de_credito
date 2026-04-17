@@ -1,7 +1,9 @@
 """Fixtures compartilhadas para os testes do pipeline ETL."""
 import importlib.util
+import shutil
 import sys
 import types
+import uuid
 from pathlib import Path
 
 import pandas as pd
@@ -27,6 +29,28 @@ def clean_mod():
 @pytest.fixture(scope="session")
 def validate_mod():
     return _load_module("03_validate.py", "etl_03")
+
+
+@pytest.fixture
+def workspace_tmp_dir() -> Path:
+    """Cria um diretório temporário local ao workspace, sem depender do tmp_path do pytest."""
+    base_dir = ROOT / "pytest_artifacts"
+    base_dir.mkdir(exist_ok=True)
+    temp_dir = base_dir / uuid.uuid4().hex
+    temp_dir.mkdir()
+    yield temp_dir
+    shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+@pytest.fixture(scope="module")
+def workspace_tmp_dir_module(request) -> Path:
+    """Versão module-scoped para testes de integração com múltiplas asserções."""
+    base_dir = ROOT / "pytest_artifacts"
+    base_dir.mkdir(exist_ok=True)
+    temp_dir = base_dir / f"{request.module.__name__.replace('.', '_')}_{uuid.uuid4().hex}"
+    temp_dir.mkdir()
+    yield temp_dir
+    shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 @pytest.fixture

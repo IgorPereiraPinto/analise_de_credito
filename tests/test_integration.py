@@ -1,9 +1,9 @@
-"""Teste de integração — pipeline ponta a ponta com o Excel sintético real.
+"""Teste de integracao: pipeline ponta a ponta com o Excel sintetico real.
 
-Executa o fluxo completo: extract → clean → validate → export
+Executa o fluxo completo: extract -> clean -> validate -> export
 usando o arquivo dados_sinteticos_case.xlsx em data/raw/.
 
-Skippado automaticamente quando o Excel não está disponível
+Skippado automaticamente quando o Excel nao esta disponivel
 (ex: CI sem o arquivo versionado).
 """
 import importlib.util
@@ -32,11 +32,11 @@ def _load(filename: str, name: str):
 
 
 @pytest.fixture(scope="module")
-def pipeline_result(tmp_path_factory):
+def pipeline_result(workspace_tmp_dir_module):
     if not EXCEL_PATH.exists():
-        pytest.skip("dados_sinteticos_case.xlsx ausente — teste de integração ignorado")
+        pytest.skip("dados_sinteticos_case.xlsx ausente - teste de integracao ignorado")
 
-    out_dir = tmp_path_factory.mktemp("processed")
+    out_dir = workspace_tmp_dir_module
 
     os.environ["DATA_RAW_PATH"] = str(EXCEL_PATH)
     os.environ["DATA_PROCESSED_PATH"] = str(out_dir) + "/"
@@ -72,19 +72,19 @@ class TestPipelineCompleto:
 
     def test_tabelas_validadas_nao_vazias(self, pipeline_result):
         for name, df in pipeline_result["validated"].items():
-            assert len(df) > 0, f"Tabela {name} ficou vazia após validação"
+            assert len(df) > 0, f"Tabela {name} ficou vazia apos validacao"
 
     def test_csvs_exportados_existem(self, pipeline_result):
         out_dir = pipeline_result["out_dir"]
         for table in TABLES:
             csv_path = out_dir / f"{table}.csv"
-            assert csv_path.exists(), f"{table}.csv não foi gerado"
+            assert csv_path.exists(), f"{table}.csv nao foi gerado"
 
     def test_csvs_exportados_nao_vazios(self, pipeline_result):
         out_dir = pipeline_result["out_dir"]
         for table in TABLES:
             df = pd.read_csv(out_dir / f"{table}.csv", sep=";", encoding="utf-8-sig")
-            assert len(df) > 0, f"{table}.csv está vazio"
+            assert len(df) > 0, f"{table}.csv esta vazio"
 
     def test_validation_report_gerado(self, pipeline_result):
         report_path = pipeline_result["out_dir"] / "validation_report.csv"

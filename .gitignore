@@ -42,6 +42,9 @@ logs/
 temp/
 tmp/
 
+# Pytest — diretório de temporários local (--basetemp=.pytest_tmp)
+.pytest_tmp/
+
 # Arquivos Office gerados/temporários
 ~$*.xlsx
 ~$*.docx

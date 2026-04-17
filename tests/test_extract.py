@@ -60,16 +60,16 @@ class TestLoadExcel:
         with pytest.raises(SystemExit):
             extract_mod.load_excel("caminho/que/nao/existe.xlsx")
 
-    def test_excel_com_aba_faltando_chama_sys_exit(self, extract_mod, tmp_path):
-        excel_path = tmp_path / "incompleto.xlsx"
+    def test_excel_com_aba_faltando_chama_sys_exit(self, extract_mod, workspace_tmp_dir):
+        excel_path = workspace_tmp_dir / "incompleto.xlsx"
         pd.DataFrame({"cliente_id": ["C001"]}).to_excel(
             excel_path, sheet_name="clientes", index=False
         )
         with pytest.raises(SystemExit):
             extract_mod.load_excel(str(excel_path))
 
-    def test_excel_com_schema_errado_chama_sys_exit(self, extract_mod, tmp_path):
-        excel_path = tmp_path / "schema_errado.xlsx"
+    def test_excel_com_schema_errado_chama_sys_exit(self, extract_mod, workspace_tmp_dir):
+        excel_path = workspace_tmp_dir / "schema_errado.xlsx"
         sheets = ["clientes", "operacoes", "ratings", "limites", "exposicoes"]
         with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
             for sheet in sheets:

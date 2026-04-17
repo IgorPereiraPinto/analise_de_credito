@@ -1,4 +1,4 @@
-"""Testes para 04_export.py — serialização dos dados validados."""
+"""Testes para 04_export.py: serializacao dos dados validados."""
 import importlib.util
 import sys
 import types
@@ -8,6 +8,7 @@ import pandas as pd
 import pytest
 
 ROOT = Path(__file__).parent.parent
+pyarrow = pytest.importorskip("pyarrow", reason="pyarrow nao instalado - skip testes parquet")
 
 
 def _load_export():
@@ -40,53 +41,50 @@ def sample_data():
     }
 
 
-class TestExportCSV:
-    def test_csv_criado(self, export_mod, sample_data, tmp_path):
-        import os
-        os.environ["DATA_PROCESSED_PATH"] = str(tmp_path)
-        os.environ["EXPORT_FORMAT"] = "csv"
-        # recarrega variáveis de ambiente no módulo
-        export_mod.DATA_PROCESSED_PATH = str(tmp_path)
-        export_mod.EXPORT_FORMAT = "csv"
-        export_mod.export_all(sample_data)
-        assert (tmp_path / "clientes.csv").exists()
-        assert (tmp_path / "ratings.csv").exists()
+@pytest.fixture
+def configured_csv(export_mod, workspace_tmp_dir, monkeypatch):
+    """Configura o modulo de export para CSV em diretorio temporario local."""
+    monkeypatch.setattr(export_mod, "DATA_PROCESSED_PATH", str(workspace_tmp_dir))
+    monkeypatch.setattr(export_mod, "EXPORT_FORMAT", "csv")
+    return workspace_tmp_dir
 
-    def test_csv_separador_ponto_virgula(self, export_mod, sample_data, tmp_path):
-        export_mod.DATA_PROCESSED_PATH = str(tmp_path)
-        export_mod.EXPORT_FORMAT = "csv"
+
+@pytest.fixture
+def configured_parquet(export_mod, workspace_tmp_dir, monkeypatch):
+    """Configura o modulo de export para Parquet em diretorio temporario local."""
+    monkeypatch.setattr(export_mod, "DATA_PROCESSED_PATH", str(workspace_tmp_dir))
+    monkeypatch.setattr(export_mod, "EXPORT_FORMAT", "parquet")
+    return workspace_tmp_dir
+
+
+class TestExportCSV:
+    def test_csv_criado(self, export_mod, sample_data, configured_csv):
         export_mod.export_all(sample_data)
-        content = (tmp_path / "clientes.csv").read_text(encoding="utf-8-sig")
+        assert (configured_csv / "clientes.csv").exists()
+        assert (configured_csv / "ratings.csv").exists()
+
+    def test_csv_separador_ponto_virgula(self, export_mod, sample_data, configured_csv):
+        export_mod.export_all(sample_data)
+        content = (configured_csv / "clientes.csv").read_text(encoding="utf-8-sig")
         assert ";" in content
 
-    def test_csv_sem_index(self, export_mod, sample_data, tmp_path):
-        export_mod.DATA_PROCESSED_PATH = str(tmp_path)
-        export_mod.EXPORT_FORMAT = "csv"
+    def test_csv_sem_index(self, export_mod, sample_data, configured_csv):
         export_mod.export_all(sample_data)
-        df = pd.read_csv(tmp_path / "clientes.csv", sep=";", encoding="utf-8-sig")
+        df = pd.read_csv(configured_csv / "clientes.csv", sep=";", encoding="utf-8-sig")
         assert "Unnamed: 0" not in df.columns
 
-    def test_csv_linhas_preservadas(self, export_mod, sample_data, tmp_path):
-        export_mod.DATA_PROCESSED_PATH = str(tmp_path)
-        export_mod.EXPORT_FORMAT = "csv"
+    def test_csv_linhas_preservadas(self, export_mod, sample_data, configured_csv):
         export_mod.export_all(sample_data)
-        df = pd.read_csv(tmp_path / "clientes.csv", sep=";", encoding="utf-8-sig")
+        df = pd.read_csv(configured_csv / "clientes.csv", sep=";", encoding="utf-8-sig")
         assert len(df) == 2
 
 
-pyarrow = pytest.importorskip("pyarrow", reason="pyarrow não instalado — skip testes parquet")
-
-
 class TestExportParquet:
-    def test_parquet_criado(self, export_mod, sample_data, tmp_path):
-        export_mod.DATA_PROCESSED_PATH = str(tmp_path)
-        export_mod.EXPORT_FORMAT = "parquet"
+    def test_parquet_criado(self, export_mod, sample_data, configured_parquet):
         export_mod.export_all(sample_data)
-        assert (tmp_path / "clientes.parquet").exists()
+        assert (configured_parquet / "clientes.parquet").exists()
 
-    def test_parquet_linhas_preservadas(self, export_mod, sample_data, tmp_path):
-        export_mod.DATA_PROCESSED_PATH = str(tmp_path)
-        export_mod.EXPORT_FORMAT = "parquet"
+    def test_parquet_linhas_preservadas(self, export_mod, sample_data, configured_parquet):
         export_mod.export_all(sample_data)
-        df = pd.read_parquet(tmp_path / "clientes.parquet")
+        df = pd.read_parquet(configured_parquet / "clientes.parquet")
         assert len(df) == 2
