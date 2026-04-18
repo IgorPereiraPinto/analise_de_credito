@@ -58,7 +58,13 @@ SELECT
         / NULLIF(SUM(er.exposicao_total), 0), 0
     )                                                           AS score_ponderado_carteira,
     ROUND(AVG(CAST(rr.score_interno AS FLOAT)), 0)              AS score_medio_simples,
-    ROUND(AVG(rr.pd_12m) * 100, 3)                             AS pd_medio_pct,
+    -- pd_ponderado_pct: PD ponderada pela exposição de cada cliente — métrica correta para
+    -- carteiras com clientes heterogêneos. Evita distorção por PD alta em exposições pequenas.
+    ROUND(
+        SUM(rr.pd_12m * er.exposicao_total)
+        / NULLIF(SUM(er.exposicao_total), 0) * 100, 3
+    )                                                           AS pd_ponderado_pct,
+    ROUND(AVG(rr.pd_12m) * 100, 3)                             AS pd_medio_simples_pct,
     COUNT(DISTINCT CASE WHEN rr.rating_interno IN ('BB', 'BB-', 'B+', 'B', 'B-', 'C')
         THEN rr.cliente_id END)                                 AS clientes_subinvestment,
     -- Status do score ponderado (benchmark interno)

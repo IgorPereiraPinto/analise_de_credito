@@ -71,7 +71,7 @@ body.exec-mode .tech-tag, body.exec-mode .tech-source {display:none!important}
 .section-title::after{content:'';flex:1;height:1px;background:var(--gray-2)}
 .section-badge{background:var(--orange-bg);color:var(--orange);font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid rgba(236,112,0,.18);font-weight:700;text-transform:none;letter-spacing:0}
 .kpi-grid{display:grid;gap:10px;margin-bottom:4px;width:100%}
-.kpi-6{grid-template-columns:repeat(6,1fr)} .kpi-4{grid-template-columns:repeat(4,1fr)} .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%} .g3{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%} .g3b{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%}
+.kpi-main{grid-template-columns:repeat(3,1fr)} .kpi-6{grid-template-columns:repeat(6,1fr)} .kpi-4{grid-template-columns:repeat(4,1fr)} .kpi-3{grid-template-columns:repeat(3,1fr)} .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%} .g3{display:grid;grid-template-columns:2fr 1fr;gap:12px;width:100%} .g3b{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%}
 .kpi-card{background:linear-gradient(180deg,#fff 0%,#FCFCFD 100%);border-radius:var(--radius);padding:16px 16px 14px;box-shadow:var(--shadow);border:1px solid rgba(13,27,42,.04);border-left:4px solid var(--gray-2);position:relative;overflow:hidden;transition:transform .14s ease,box-shadow .18s ease}
 .kpi-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-strong)}
 .kpi-card::before{content:'';position:absolute;top:0;right:0;width:66px;height:66px;border-radius:50%;opacity:.06;transform:translate(20px,-18px)}
@@ -132,7 +132,7 @@ tbody td{padding:9px 11px;font-size:12px;color:var(--gray-6);white-space:nowrap}
 .nota{margin:0 16px 16px;padding:14px 16px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);border-radius:12px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 8px 18px rgba(13,27,42,.18)}
 .nota-text{font-size:11px;color:#D4DEE8;line-height:1.65}.nota-text strong{color:#FFD1A0}
 .empty-row td{text-align:center;color:var(--gray-4);font-style:italic;padding:20px}
-@media(max-width:1200px){.kpi-6,.kpi-4,.g2,.g3,.g3b,.glo-grid{grid-template-columns:1fr}}
+@media(max-width:1200px){.kpi-main,.kpi-6,.kpi-4,.kpi-3,.g2,.g3,.g3b,.glo-grid{grid-template-columns:1fr}}
 @media(max-width:900px){.header{height:auto;padding:12px 16px;align-items:flex-start;gap:12px;flex-direction:column}.header-right{flex-wrap:wrap}}
 </style>
 </head>
@@ -169,10 +169,11 @@ tbody td{padding:9px 11px;font-size:12px;color:var(--gray-6);white-space:nowrap}
 <div class="tabs-shell">
   <div class="tabs-bar">
     <div class="tab active" onclick="switchTab(0)">📊 Visão Geral</div>
-    <div class="tab" onclick="switchTab(1)">⚠️ Análise de Riscos</div>
-    <div class="tab" onclick="switchTab(2)">💳 Performance de Limites</div>
-    <div class="tab" onclick="switchTab(3)">🔬 Análises Adicionais</div>
-    <div class="tab" onclick="switchTab(4)">📖 Glossário</div>
+    <div class="tab" onclick="switchTab(1)">🧭 Aprof. KPIs</div>
+    <div class="tab" onclick="switchTab(2)">⚠️ Análise de Riscos</div>
+    <div class="tab" onclick="switchTab(3)">💳 Performance de Limites</div>
+    <div class="tab" onclick="switchTab(4)">🔬 Análises Adicionais</div>
+    <div class="tab" onclick="switchTab(5)">📖 Glossário</div>
   </div>
 </div>
 
@@ -223,7 +224,7 @@ tbody td{padding:9px 11px;font-size:12px;color:var(--gray-6);white-space:nowrap}
       <div class="kpi-card c-yellow"><div class="kpi-label">Score Médio</div><div class="kpi-value" id="k-score">791</div><div class="kpi-footer"><span class="kpi-bench">Meta: ≥ 800</span><span class="badge b-att" id="k-score-badge">⚠ Atenção</span></div></div>
       <div class="kpi-card c-navy"><div class="kpi-label">PD Média</div><div class="kpi-value" id="k-pd">3,22%</div><div class="kpi-footer"><span class="kpi-bench">Meta: &lt; 1%</span><span class="badge b-crit" id="k-pd-badge">✗ Acima</span></div></div>
       <div class="kpi-card c-red"><div class="kpi-label">Operações Vencidas</div><div class="kpi-value" id="k-venc">11</div><div class="kpi-footer"><span class="kpi-bench">Meta: 0</span><span class="badge b-crit">✗ Crítico</span></div></div>
-      <div class="kpi-card c-navy"><div class="kpi-label">Provisão Total Estimada</div><div class="kpi-value" id="k-prov-total">R$ 81,1 M</div><div class="kpi-footer"><span class="kpi-bench">PD × Exposição Descoberta</span><span class="badge b-att">⚠ Monitorar</span></div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">Provisão Total Estimada</div><div class="kpi-value" id="k-prov-total">R$ 81,1 M</div><div class="kpi-footer"><span class="kpi-bench">PD pond. × Exp. Descoberta (LGD=100%)</span><span class="badge b-att">⚠ Monitorar</span></div></div>
     </div>
 
     <div class="section-title">Provisão Necessária (PCLD) e Classificação de Risco <span class="section-badge tech-tag">camada semântica SQL</span></div>
@@ -287,6 +288,55 @@ tbody td{padding:9px 11px;font-size:12px;color:var(--gray-6);white-space:nowrap}
   </div>
 
   <div class="tab-panel" id="panel-1">
+    <div class="section-title">Aprofundamento de KPIs <span class="section-badge" id="deep-period-label">12M</span></div>
+    <div class="kpi-grid kpi-3">
+      <div class="kpi-card c-red"><div class="kpi-label">Valor Vencido</div><div class="kpi-value" id="k-venc-valor">R$ 0,0 M</div><div class="kpi-footer"><span class="kpi-bench" id="k-venc-pct">0,0% da carteira</span><span class="badge b-ok" id="k-venc-valor-badge">✓ Controle</span></div></div>
+      <div class="kpi-card c-orange"><div class="kpi-label">Utilização Média</div><div class="kpi-value" id="k-util-main">65,0%</div><div class="kpi-footer"><span class="kpi-bench">Ideal: 60–75%</span><span class="badge b-ok" id="k-util-main-badge">✓ Ideal</span></div></div>
+      <div class="kpi-card c-navy"><div class="kpi-label">Concentração Top 5</div><div class="kpi-value" id="k-top5">0,0%</div><div class="kpi-footer"><span class="kpi-bench" id="k-top5-exp">R$ 0,0 M concentrados</span><span class="badge b-ok" id="k-top5-badge">✓ Pulverizado</span></div></div>
+    </div>
+
+    <div class="section-title">Valor Vencido</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Valor Vencido por Setor</div><div class="card-sub" id="venc-setor-sub">Soma do valor utilizado em atraso no recorte ativo</div></div><span class="card-tag tech-tag">vw_operacoes_vencidas</span></div>
+        <canvas id="cVencSetor"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Aging das Operações Vencidas</div><div class="card-sub" id="venc-aging-sub">Faixas de atraso para priorização de cobrança</div></div><span class="card-tag tech-tag">vw_operacoes_vencidas</span></div>
+        <canvas id="cVencAging"></canvas>
+      </div>
+    </div>
+
+    <div class="section-title">Utilização Média</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Utilização Média por Segmento</div><div class="card-sub" id="util-seg-sub">Média do uso do limite no recorte selecionado</div></div><span class="card-tag tech-tag">vw_kpi_limites</span></div>
+        <canvas id="cUtilSeg"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Top 5 Utilizações</div><div class="card-sub" id="util-top-sub">Clientes com maior pressão de limite</div></div><span class="card-tag tech-tag">vw_clientes_em_atencao</span></div>
+        <canvas id="cUtilTopDeep"></canvas>
+      </div>
+    </div>
+
+    <div class="section-title">Concentração Top 5</div>
+    <div class="g2">
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Exposição dos 5 Maiores Clientes</div><div class="card-sub" id="top5-bar-sub">Ranking por exposição do recorte ativo</div></div><span class="card-tag tech-tag">vw_kpi_exposicao</span></div>
+        <canvas id="cTop5Bar"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><div class="card-title">Top 5 vs Restante da Carteira</div><div class="card-sub" id="top5-donut-sub">Participação relativa da concentração principal</div></div><span class="card-tag tech-tag">vw_kpi_exposicao</span></div>
+        <canvas id="cTop5Donut" class="c-sm"></canvas>
+        <div class="dleg">
+          <div class="dli"><div class="dll"><div class="dld" style="background:#1C3450"></div>Top 5</div><div class="dlv" id="leg-top5-main">R$ 0,0 M</div></div>
+          <div class="dli"><div class="dll"><div class="dld" style="background:#BFC3CA"></div>Restante</div><div class="dlv" id="leg-top5-rest">R$ 0,0 M</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-2">
     <div id="alert-box" class="alerts"></div>
     <div class="section-title">Matriz de Risco</div>
     <div class="g3">
@@ -329,7 +379,7 @@ tbody td{padding:9px 11px;font-size:12px;color:var(--gray-6);white-space:nowrap}
     </div>
   </div>
 
-  <div class="tab-panel" id="panel-2">
+  <div class="tab-panel" id="panel-3">
     <div class="section-title">KPIs de Utilização de Limites</div>
     <div class="kpi-grid kpi-4">
       <div class="kpi-card c-orange"><div class="kpi-label">Utilização Média — Global</div><div class="kpi-value" id="k-util">65,0%</div><div class="kpi-footer"><span class="kpi-bench">Ideal: 60–75%</span><span class="badge b-ok" id="k-util-badge">✓ Ideal</span></div></div>
@@ -363,7 +413,7 @@ tbody td{padding:9px 11px;font-size:12px;color:var(--gray-6);white-space:nowrap}
     </div>
   </div>
 
-  <div class="tab-panel" id="panel-3">
+  <div class="tab-panel" id="panel-4">
     <div class="alerts">
       <div class="alert blue"><div class="alert-icon">🔬</div><div><div class="at">Análises adicionais aderentes ao case</div><div class="ab">Nesta versão, a aba foi reorientada para cobrir a lacuna da Questão 2.5 e incorporar o monitoramento de crise sugerido na Parte 5.1.</div></div></div>
     </div>
@@ -409,16 +459,19 @@ tbody td{padding:9px 11px;font-size:12px;color:var(--gray-6);white-space:nowrap}
     </div>
   </div>
 
-  <div class="tab-panel" id="panel-4">
+  <div class="tab-panel" id="panel-5">
     <div class="section-title">Indicadores do Dashboard — o que cada KPI significa</div>
     <div class="glo-grid">
       <div class="glo-card"><div class="glo-name">📦 Exposição Total do Portfólio</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_exposicao</div><div class="glo-formula">SUM(exposicao_total) — último mês disponível</div><div class="glo-desc">Valor total em risco no portfólio corporativo. No recorte base 12M, o portfólio soma R$ 9,49 bi.</div><div class="glo-bench"><span class="gb gb-ok">✓ leitura estrutural do tamanho da carteira</span></div></div>
       <div class="glo-card"><div class="glo-name">🛡️ % Exposição Descoberta</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_exposicao</div><div class="glo-formula">exposicao_descoberta ÷ exposicao_total × 100</div><div class="glo-desc">Mostra a parcela da carteira sem cobertura forte. No case, 25,0% ficou dentro da meta definida (&lt; 30%).</div><div class="glo-bench"><span class="gb gb-ok">✓ Meta: &lt; 30%</span><span class="gb gb-att">⚠ 30–35%</span><span class="gb gb-crit">✗ &gt; 40%</span></div></div>
       <div class="glo-card"><div class="glo-name">⭐ Score Médio</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_ratings</div><div class="glo-formula">AVG(score_interno)</div><div class="glo-desc">Indicador médio de qualidade de crédito do portfólio. Permite acompanhar deterioração ou recuperação da carteira ao longo do tempo.</div><div class="glo-bench"><span class="gb gb-ok">✓ ≥ 800</span><span class="gb gb-att">⚠ 750–799</span><span class="gb gb-crit">✗ &lt; 650</span></div></div>
-      <div class="glo-card"><div class="glo-name">📉 PD Média</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_ratings</div><div class="glo-formula">AVG(pd_12m) × 100</div><div class="glo-desc">Probabilidade média de default em 12 meses. É uma referência direta para provisão e sensibilidade do portfólio.</div><div class="glo-bench"><span class="gb gb-ok">✓ &lt; 1%</span><span class="gb gb-att">⚠ 1–2%</span><span class="gb gb-crit">✗ &gt; 3%</span></div></div>
+      <div class="glo-card"><div class="glo-name">📉 PD Média (ponderada por exposição)</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_ratings — campo pd_ponderado_pct</div><div class="glo-formula">SUM(pd_12m × exposicao_total) / SUM(exposicao_total) × 100</div><div class="glo-desc">Probabilidade de default ponderada pelo tamanho de cada cliente no portfólio. Evita que clientes pequenos com PD elevada distorçam a leitura da carteira. A versão simples (AVG) está disponível como pd_medio_simples_pct nas views SQL para comparação.</div><div class="glo-bench"><span class="gb gb-ok">✓ &lt; 1%</span><span class="gb gb-att">⚠ 1–2%</span><span class="gb gb-crit">✗ &gt; 3%</span></div></div>
       <div class="glo-card"><div class="glo-name">⚠️ Operações Vencidas</div><div class="glo-source tech-source">🗄️ SQL View: vw_operacoes_vencidas</div><div class="glo-formula">COUNT(*) WHERE status_operacao = 'Vencida'</div><div class="glo-desc">Mede risco materializado. O objetivo é evidenciar atrasos, priorização de cobrança e necessidade de renegociação.</div><div class="glo-bench"><span class="gb gb-ok">✓ 0</span><span class="gb gb-att">⚠ 1–5</span><span class="gb gb-crit">✗ &gt; 10</span></div></div>
+      <div class="glo-card"><div class="glo-name">💰 Valor Vencido</div><div class="glo-source tech-source">🗄️ SQL View: vw_operacoes_vencidas</div><div class="glo-formula">SUM(valor_utilizado) WHERE status_operacao = 'Vencida'</div><div class="glo-desc">Complementa a contagem de operações vencidas com o impacto financeiro efetivo do atraso no recorte analisado.</div><div class="glo-bench"><span class="gb gb-ok">✓ 0% da carteira</span><span class="gb gb-att">⚠ até 1%</span><span class="gb gb-crit">✗ acima de 1%</span></div></div>
       <div class="glo-card"><div class="glo-name">💳 Utilização Média de Limites</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_limites</div><div class="glo-formula">AVG(valor_utilizado ÷ valor_limite) — base tratada</div><div class="glo-desc">Foi ajustada para refletir a lógica da base tratada. Nesta versão: 65,0%, preservando coerência com os demais KPIs do projeto.</div><div class="glo-bench"><span class="gb gb-ok">✓ 60–75%</span><span class="gb gb-att">⚠ 75–85%</span><span class="gb gb-crit">✗ &gt; 85%</span></div></div>
+      <div class="glo-card"><div class="glo-name">🏦 Concentração Top 5</div><div class="glo-source tech-source">🗄️ SQL View: vw_kpi_exposicao</div><div class="glo-formula">SUM(exposição dos 5 maiores clientes) ÷ exposição total × 100</div><div class="glo-desc">Ajuda a avaliar o nível de pulverização da carteira e a dependência do portfólio em poucos nomes relevantes.</div><div class="glo-bench"><span class="gb gb-ok">✓ até 35%</span><span class="gb gb-att">⚠ 35–45%</span><span class="gb gb-crit">✗ acima de 45%</span></div></div>
       <div class="glo-card"><div class="glo-name">🏭 Concentração Setorial</div><div class="glo-source tech-source">🗄️ SQL View: vw_exposicao_por_setor</div><div class="glo-formula">exp_setor ÷ exp_total × 100</div><div class="glo-desc">Identifica excesso de concentração por setor frente ao limite regulatório de 15%.</div><div class="glo-bench"><span class="gb gb-ok">✓ &lt; 10%</span><span class="gb gb-att">⚠ 10–15%</span><span class="gb gb-crit">✗ &gt; 15%</span></div></div>
+      <div class="glo-card"><div class="glo-name">🏛️ Provisão Total Estimada (EL)</div><div class="glo-source tech-source">🗄️ SQL Views: vw_kpi_exposicao · vw_stage_exposicao_recente</div><div class="glo-formula">SUM(exposicao_descoberta × pd_ponderada_por_exposicao) — LGD implícito = 100%</div><div class="glo-desc">Expected Loss estimada para a parcela descoberta da carteira, usando PD ponderada por exposição. O LGD implícito de 100% é conservador — colaterais reduzem a perda efetiva em cenários reais. Para fins regulatórios, a provisão por rating (CMN 2.682) está calculada em vw_stage_exposicao_recente.</div><div class="glo-bench"><span class="gb gb-ok">✓ referência regulatória: % PCLD por rating (CMN 2.682)</span><span class="gb gb-att">⚠ EL estimada com LGD=100% — premissa conservadora</span></div></div>
       <div class="glo-card"><div class="glo-name">🚨 Clientes em Atenção / Alto Risco</div><div class="glo-source tech-source">🗄️ SQL View: vw_clientes_em_atencao</div><div class="glo-formula">Atenção operacional: util &gt; 75% OU desc &gt; 25% · Alto risco do case: util &gt; 80% E desc &gt; 30%</div><div class="glo-desc">O dashboard foi ajustado para explicitar as duas camadas: a operacional, útil no dia a dia, e a regra estrita do case para aderência ao enunciado.</div><div class="glo-bench"><span class="gb gb-att">⚠ monitoramento operacional</span><span class="gb gb-crit">✗ regra crítica do case</span></div></div>
     </div>
 
@@ -477,7 +530,7 @@ const PERIOD_SEG_IMPACT={
     'Middle Market':{scoreDelta:2,pdMult:0.97,descMult:0.95,bucketDrift:-0.08}
   }
 };
-const PORTFOLIO_BASE={expTotal:9491,descPct:25.0,scoreAvg:791,pdAvg:3.2167,provTotal:81.1,utilAvg:64.95,above80:16,above85:7,aprov:9944,utilizado:8412};
+const PORTFOLIO_BASE={expTotal:9491,descPct:25.0,scoreAvg:791,pdAvg:0.71,provTotal:17.0,utilAvg:64.95,above80:16,above85:7,aprov:9944,utilizado:8412};
 const SCORE_DATA={
   'Middle Market':[824,819,817,816,812,814,806,803,805,805,803,809],
   'Wholesale':[813,809,806,809,808,803,805,797,797,802,802,805],
@@ -674,6 +727,9 @@ function getWeightedPeriodMetric(clients,key,defaultValue){
     return acc + ((segExp/totalExp) * getPeriodImpact(seg)[key]);
   },0);
 }
+function getAdjustedExposure(c){
+  return (c.exp||0) * getSegmentExposurePeriodFactor(c.seg);
+}
 function getBaseDescBias(c){
   const segBias=c.seg==='Corporate'?-1.4:c.seg==='Wholesale'?-0.3:1.8;
   const regBias=c.reg==='Sudeste'?-0.4:c.reg==='Sul'?-0.2:c.reg==='Nordeste'?0.9:c.reg==='Norte'?1.1:0.3;
@@ -804,14 +860,24 @@ function getSectorData(clients){
   const setores=['Tecnologia','Saúde','Educação','Construção Civil','Químico','Mineração','Automotivo','Agronegócio','Varejo','Energia'];
   return setores.map(s=>{const rows=clients.filter(c=>c.setor===s); const exp=sum(rows.map(r=>r.exp||0)); return {setor:s,exp,pct:exp/total*100,n:rows.length};});
 }
+function getTopExposureRows(clients){
+  return [...clients]
+    .map(c=>({id:c.id,exp:getAdjustedExposure(c)}))
+    .filter(c=>c.exp>0)
+    .sort((a,b)=>b.exp-a.exp)
+    .slice(0,5);
+}
 function computeKPIs(clients){
   const factor=pc().factor;
   const expBase=sum(clients.map(c=>c.exp||0));
   const expTotal=expBase*factor;
+  const expAdjustedTotal=sum(clients.map(c=>getAdjustedExposure(c)));
   const expDesc=sum(clients.filter(c=>getAdjustedDesc(c)!=null).map(c=>(c.exp||0)*(getAdjustedDesc(c)/100)))*factor;
   const descPct=expTotal>0?expDesc/expTotal*100:0;
   const scoreAvg=Math.round(avg(clients.map(c=>getAdjustedScore(c))));
-  const pdAvg=avg(clients.map(c=>getAdjustedPd(c)));
+  // PD ponderada por exposição — evita distorção de clientes pequenos/inadimplentes com PD elevada
+  const expForPd=sum(clients.filter(c=>(c.exp||0)>0).map(c=>c.exp));
+  const pdAvg=expForPd>0?sum(clients.filter(c=>(c.exp||0)>0).map(c=>getAdjustedPd(c)*(c.exp||0)))/expForPd:0;
   const flags=clients.map(c=>riskFlags(c));
   const atencao=flags.filter(f=>f.attention && !f.high).length;
   const alto=flags.filter(f=>f.high).length;
@@ -822,13 +888,24 @@ function computeKPIs(clients){
   const above85=hasAnyFilter?clients.filter(c=>c.util>85).length:PORTFOLIO_BASE.above85;
   const aprov=hasAnyFilter?expTotal*1.048:PORTFOLIO_BASE.aprov*factor;
   const utiliz=hasAnyFilter?aprov*(utilAvg/100):PORTFOLIO_BASE.utilizado*factor;
-  const provTotal=hasAnyFilter?sum(['Corporate','Wholesale','Middle Market'].map(seg=>{
+  const vencidas=getVencidas();
+  const vencValor=sum(vencidas.map(v=>v.val||0));
+  const vencPct=expTotal>0?(vencValor/expTotal)*100:0;
+  const top5Exp=[...clients]
+    .map(c=>getAdjustedExposure(c))
+    .sort((a,b)=>b-a)
+    .slice(0,5);
+  const top5Valor=sum(top5Exp);
+  const top5Pct=expAdjustedTotal>0?(top5Valor/expAdjustedTotal)*100:0;
+  // Provisão: PD ponderada por exposição × exposição descoberta — LGD implícito = 100%
+  const provTotal=sum(['Corporate','Wholesale','Middle Market'].map(seg=>{
     const segRows=clients.filter(c=>c.seg===seg);
     const desc=sum(segRows.filter(c=>getAdjustedDesc(c)!=null).map(c=>(c.exp||0)*(getAdjustedDesc(c)/100)))*factor;
-    const pdSeg=avg(segRows.map(c=>getAdjustedPd(c)))/100;
+    const segExpPd=sum(segRows.filter(c=>(c.exp||0)>0).map(c=>c.exp))||1;
+    const pdSeg=sum(segRows.filter(c=>(c.exp||0)>0).map(c=>getAdjustedPd(c)*(c.exp||0)))/(segExpPd*100);
     return desc*pdSeg;
-  })):PORTFOLIO_BASE.provTotal*factor;
-  return {clientes:clients.length,expTotal,descPct,scoreAvg,pdAvg,atencao,alto,normal,above80,above85,utilAvg,aprov,utiliz,provTotal};
+  }));
+  return {clientes:clients.length,expTotal,descPct,scoreAvg,pdAvg,atencao,alto,normal,above80,above85,utilAvg,aprov,utiliz,provTotal,vencValor,vencPct,top5Valor,top5Pct};
 }
 function movingAverage3(arr){return arr.map((_,i)=>{const start=Math.max(0,i-2); const slice=arr.slice(start,i+1); return +(avg(slice)).toFixed(1)});}
 
@@ -839,6 +916,12 @@ function initCharts(){
   createChart('cSegDonut','doughnut',{labels:['Corporate','Wholesale','Middle Market'],datasets:[{data:[0,0,0],backgroundColor:[C.NAVY_MID,C.ORANGE,C.GRAY],borderWidth:2,borderColor:'#fff'}]},{responsive:true,maintainAspectRatio:true,cutout:'65%',plugins:{legend:{display:false}}});
   createChart('cSetorBar','bar',{labels:[],datasets:[{label:'% Portfólio',data:[],backgroundColor:[],borderRadius:4}]},{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,max:22,ticks:{callback:v=>v+'%'}},y:{...baseAxis.y,grid:{display:false}}}});
   createChart('cRatingDist','bar',{labels:['AAA','AA+','AA','AA-','A+','A','A-','BBB+','BBB','BBB-','BB+','BB','BB-','B+','B','B-','C'],datasets:[{data:Array(17).fill(0),backgroundColor:[],borderRadius:3}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y}}});
+  createChart('cVencSetor','bar',{labels:[],datasets:[{label:'Valor vencido (R$M)',data:[],backgroundColor:[],borderRadius:4}]},{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,ticks:{callback:v=>v+'M'}},y:{...baseAxis.y,grid:{display:false}}}});
+  createChart('cVencAging','bar',{labels:['1-30d','31-60d','61-90d','91-180d','180d+'],datasets:[{label:'Valor vencido (R$M)',data:[0,0,0,0,0],backgroundColor:[C.GREEN+'99',C.YELLOW+'AA',C.ORANGE+'CC',C.RED+'CC',C.RED],borderRadius:4}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y,ticks:{callback:v=>v+'M'}}}});
+  createChart('cUtilSeg','bar',{labels:['Corporate','Wholesale','Middle Market'],datasets:[{label:'Utilização média (%)',data:[0,0,0],backgroundColor:[C.NAVY_MID+'CC',C.ORANGE+'CC',C.GRAY+'CC'],borderRadius:4}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y,min:0,max:100,ticks:{callback:v=>v+'%'}}}});
+  createChart('cUtilTopDeep','bar',{labels:[],datasets:[{label:'Utilização (%)',data:[],backgroundColor:[],borderRadius:4}]},{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,min:70,max:100,ticks:{callback:v=>v+'%'}},y:{...baseAxis.y,grid:{display:false}}}});
+  createChart('cTop5Bar','bar',{labels:[],datasets:[{label:'Exposição (R$M)',data:[],backgroundColor:C.NAVY_MID+'CC',borderRadius:4}]},{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,ticks:{callback:v=>v+'M'}},y:{...baseAxis.y,grid:{display:false}}}});
+  createChart('cTop5Donut','doughnut',{labels:['Top 5','Restante'],datasets:[{data:[0,0],backgroundColor:[C.NAVY_MID,C.GRAY],borderWidth:2,borderColor:'#fff'}]},{responsive:true,maintainAspectRatio:true,cutout:'65%',plugins:{legend:{display:false}}});
   createChart('cScatter','scatter',{datasets:[{label:'Clientes',data:[],backgroundColor:[],pointRadius:6,pointHoverRadius:8}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw.id} · Util ${ctx.raw.x.toFixed(1)}% | Desc ${ctx.raw.y.toFixed(1)}% | ${ctx.raw.cls}`}}},scales:{x:{...baseAxis.x,min:50,max:100,title:{display:true,text:'% Utilização'},ticks:{callback:v=>v+'%'}},y:{...baseAxis.y,min:0,max:45,title:{display:true,text:'% Descoberta'},ticks:{callback:v=>v+'%'}}}});
   createChart('cRiskDonut','doughnut',{labels:['Normal','Atenção','Alto Risco'],datasets:[{data:[0,0,0],backgroundColor:[C.GREEN,C.ORANGE,C.RED],borderWidth:2,borderColor:'#fff'}]},{responsive:true,maintainAspectRatio:true,cutout:'65%',plugins:{legend:{display:false}}});
   createChart('cMigracao','bar',{labels:['Melhora','Estável','Piora'],datasets:[{data:[0,0,0],backgroundColor:[C.GREEN+'CC',C.GRAY+'CC',C.RED+'CC'],borderRadius:4}]},{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{...baseAxis.x,grid:{display:false}},y:{...baseAxis.y}}});
@@ -862,6 +945,7 @@ function updateTexts(clients,kpis){
   const crisisExp=sum(crisisRows.map(r=>r.exp||0));
   setText('filter-count',`${clients.length} clientes · ${ops} operações`);
   setText('kpi-period-label',pc().tag);
+  setText('deep-period-label',pc().tag);
   setText('score-sub',`Score médio mensal — ${pc().label}`);
   setText('score-tag',`${pc().tag} · vw_score_por_segmento_mes`);
   setText('rating-dist-sub',`Clientes por rating interno — ${clients.length} clientes`);
@@ -872,6 +956,12 @@ function updateTexts(clients,kpis){
   setText('migracao-sub',`${clients.length} clientes · ${pc().rangeLabel}`);
   setText('migracao-int-sub',`Número de níveis alterados · ${scope}`);
   setText('venc-sub',`${getVencidas().length} operação(ões) · período ${pc().tag}`);
+  setText('venc-setor-sub',`Valor utilizado vencido por setor · ${scope}`);
+  setText('venc-aging-sub',`Faixas de atraso no recorte ${pc().tag}`);
+  setText('util-seg-sub',`Média por segmento · ${scope}`);
+  setText('util-top-sub',`Top 5 clientes por utilização · ${scope}`);
+  setText('top5-bar-sub',`Ranking por exposição ajustada ao período · ${scope}`);
+  setText('top5-donut-sub',`Participação dos 5 maiores clientes · ${scope}`);
   setText('classif-sub',`Exposição por faixa de rating — ${clients.length} clientes · ${pc().tag}`);
   setText('prov-seg-sub',`PCLD estimada por segmento · ${scope}`);
   setText('seg-dist-sub',`Exposição do recorte ativo — ${scope}`);
@@ -894,6 +984,11 @@ function updateKPIs(clients,kpis){
   setText('k-pd',`${kpis.pdAvg.toFixed(2).replace('.',',')}%`);
   setText('k-venc',String(getVencidas().length));
   setText('k-prov-total',fmt(kpis.provTotal));
+  setText('k-venc-valor',fmt(kpis.vencValor));
+  setText('k-venc-pct',`${kpis.vencPct.toFixed(1).replace('.',',')}% da carteira`);
+  setText('k-util-main',`${kpis.utilAvg.toFixed(1).replace('.',',')}%`);
+  setText('k-top5',`${kpis.top5Pct.toFixed(1).replace('.',',')}%`);
+  setText('k-top5-exp',`${fmt(kpis.top5Valor)} concentrados`);
   setText('k-util',`${kpis.utilAvg.toFixed(1).replace('.',',')}%`);
   setText('k-80',String(kpis.above80));
   setText('k-85',String(kpis.above85));
@@ -904,10 +999,57 @@ function updateKPIs(clients,kpis){
   setBadge('k-desc-badge',kpis.descPct<30,'✓ Na Meta','⚠ Revisão','b-att');
   setBadge('k-score-badge',kpis.scoreAvg>=800,'✓ Muito Bom','⚠ Atenção','b-att');
   setBadge('k-pd-badge',kpis.pdAvg<1,'✓ Na Meta','✗ Acima','b-crit');
+  setBadge('k-venc-valor-badge',kpis.vencPct===0,'✓ Controle',kpis.vencPct<=1?'⚠ Atenção':'✗ Crítico',kpis.vencPct<=1?'b-att':'b-crit');
+  setBadge('k-util-main-badge',kpis.utilAvg>=60&&kpis.utilAvg<=75,'✓ Ideal','⚠ Atenção','b-att');
   setBadge('k-util-badge',kpis.utilAvg>=60&&kpis.utilAvg<=75,'✓ Ideal','⚠ Atenção','b-att');
+  setBadge('k-top5-badge',kpis.top5Pct<=35,'✓ Pulverizado',kpis.top5Pct<=45?'⚠ Monitorar':'✗ Concentrado',kpis.top5Pct<=45?'b-att':'b-crit');
   setText('leg-att',`${kpis.atencao} clientes`);
   setText('leg-high',`${kpis.alto} clientes`);
   setText('leg-norm',`${kpis.normal} clientes`);
+}
+function updateDeepDiveKPIs(clients,kpis){
+  const vencidas=getVencidas();
+  const vencSetor=['Tecnologia','Saúde','Educação','Construção Civil','Químico','Mineração','Automotivo','Agronegócio','Varejo','Energia']
+    .map(setor=>({setor,valor:sum(vencidas.filter(v=>v.setor===setor).map(v=>v.val||0))}))
+    .filter(r=>r.valor>0)
+    .sort((a,b)=>b.valor-a.valor);
+  upd('cVencSetor',ch=>{
+    ch.data.labels=vencSetor.map(r=>r.setor);
+    ch.data.datasets[0].data=vencSetor.map(r=>+r.valor.toFixed(1));
+    ch.data.datasets[0].backgroundColor=vencSetor.map((_,i)=>i===0?C.RED+'CC':C.ORANGE+'CC');
+  });
+  const agingBuckets=[
+    sum(vencidas.filter(v=>v.dias<=30).map(v=>v.val||0)),
+    sum(vencidas.filter(v=>v.dias>30&&v.dias<=60).map(v=>v.val||0)),
+    sum(vencidas.filter(v=>v.dias>60&&v.dias<=90).map(v=>v.val||0)),
+    sum(vencidas.filter(v=>v.dias>90&&v.dias<=180).map(v=>v.val||0)),
+    sum(vencidas.filter(v=>v.dias>180).map(v=>v.val||0))
+  ];
+  upd('cVencAging',ch=>{ch.data.datasets[0].data=agingBuckets.map(v=>+v.toFixed(1));});
+
+  const segLabels=getSegLabels(clients).filter(seg=>clients.some(c=>c.seg===seg));
+  const utilSeg=segLabels.map(seg=>+avg(clients.filter(c=>c.seg===seg).map(c=>c.util)).toFixed(1));
+  upd('cUtilSeg',ch=>{
+    ch.data.labels=segLabels;
+    ch.data.datasets[0].data=utilSeg;
+    ch.data.datasets[0].backgroundColor=segLabels.map(seg=>seg==='Corporate'?C.NAVY_MID+'CC':seg==='Wholesale'?C.ORANGE+'CC':C.GRAY+'CC');
+  });
+  const topUtil=[...clients].sort((a,b)=>b.util-a.util).slice(0,5);
+  upd('cUtilTopDeep',ch=>{
+    ch.data.labels=topUtil.map(r=>r.id);
+    ch.data.datasets[0].data=topUtil.map(r=>r.util);
+    ch.data.datasets[0].backgroundColor=topUtil.map(r=>r.util>85?C.RED+'CC':C.ORANGE+'CC');
+  });
+
+  const top5Rows=getTopExposureRows(clients);
+  const top5Rest=Math.max(kpis.expTotal-kpis.top5Valor,0);
+  upd('cTop5Bar',ch=>{
+    ch.data.labels=top5Rows.map(r=>r.id);
+    ch.data.datasets[0].data=top5Rows.map(r=>+r.exp.toFixed(1));
+  });
+  upd('cTop5Donut',ch=>{ch.data.datasets[0].data=[+kpis.top5Valor.toFixed(1),+top5Rest.toFixed(1)];});
+  setText('leg-top5-main',fmt(kpis.top5Valor));
+  setText('leg-top5-rest',fmt(top5Rest));
 }
 function updateAlerts(clients,kpis){
   const box=document.getElementById('alert-box'); if(!box) return;
@@ -1015,15 +1157,13 @@ function updateClassifProvCharts(clients){
   setText('leg-classif-mid',fmt(buckets[1]));
   setText('leg-classif-spec',fmt(buckets[2]));
   setText('leg-classif-risk',fmt(buckets[3]));
-  const hasAnyFilter=!!(STATE.seg||STATE.setor||STATE.reg||STATE.period!=='12m');
-  const provBySeg=hasAnyFilter
-    ? ['Corporate','Wholesale','Middle Market'].map(seg=>{
-        const rows=clients.filter(c=>c.seg===seg);
-        const desc=sum(rows.filter(c=>getAdjustedDesc(c)!=null).map(c=>(c.exp||0)*(getAdjustedDesc(c)/100)))*pc().factor;
-        const pdSeg=avg(rows.map(c=>getAdjustedPd(c)))/100;
-        return +(desc*pdSeg).toFixed(1);
-      })
-    : [47.0,31.0,3.1];
+  const provBySeg=['Corporate','Wholesale','Middle Market'].map(seg=>{
+    const rows=clients.filter(c=>c.seg===seg);
+    const desc=sum(rows.filter(c=>getAdjustedDesc(c)!=null).map(c=>(c.exp||0)*(getAdjustedDesc(c)/100)))*pc().factor;
+    const segExpPd=sum(rows.filter(c=>(c.exp||0)>0).map(c=>c.exp))||1;
+    const pdSeg=sum(rows.filter(c=>(c.exp||0)>0).map(c=>getAdjustedPd(c)*(c.exp||0)))/(segExpPd*100);
+    return +(desc*pdSeg).toFixed(1);
+  });
   upd('cProvSegmento',ch=>{ch.data.datasets[0].data=provBySeg;});
 }
 function updateScatter(clients){
@@ -1130,6 +1270,7 @@ function updateCrisisCharts(){
 function updateAll(){
   const clients=getClients(), kpis=computeKPIs(clients);
   updateTexts(clients,kpis); updateKPIs(clients,kpis); updateAlerts(clients,kpis);
+  updateDeepDiveKPIs(clients,kpis);
   updateRiskTable(clients); updateVencidasTable();
   updateClassifProvCharts(clients); updateScoreChart(clients); updateSegDonut(clients); updateSectorBar(clients); updateRatingChart(clients);
   updateScatter(clients); updateRiskDonut(clients); updateMigracao(clients); updatePerformance(clients,kpis); updateStatsCharts(clients); updateCrisisCharts();

@@ -70,6 +70,9 @@ SELECT
         WHEN s.score_interno >= 450 THEN 'B'
         ELSE                             'C'
     END AS classificacao_risco,
+    -- provisao_necessaria: % da exposicao_total por faixa de risco (referência CMN 2.682).
+    -- LGD está embutido implicitamente na taxa regulatória de cada bucket — não é segregado.
+    -- Para Expected Loss estocástica: usar pd_12m × EAD × LGD explícito.
     ROUND(e.exposicao_total * CASE
         WHEN s.score_interno >= 850 THEN 0.000
         WHEN s.score_interno >= 750 THEN 0.005

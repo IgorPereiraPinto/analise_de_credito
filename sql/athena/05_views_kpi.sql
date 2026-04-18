@@ -37,7 +37,12 @@ SELECT
         / NULLIF(SUM(er.exposicao_total), 0), 0
     )                                                           AS score_ponderado_carteira,
     ROUND(AVG(CAST(rr.score_interno AS DOUBLE)), 0)             AS score_medio_simples,
-    ROUND(AVG(rr.pd_12m) * 100, 3)                             AS pd_medio_pct
+    -- pd_ponderado_pct: PD ponderada pela exposição — métrica correta para carteiras heterogêneas.
+    ROUND(
+        SUM(rr.pd_12m * er.exposicao_total)
+        / NULLIF(SUM(er.exposicao_total), 0) * 100, 3
+    )                                                           AS pd_ponderado_pct,
+    ROUND(AVG(rr.pd_12m) * 100, 3)                             AS pd_medio_simples_pct
 FROM credito_ibba.vw_stage_rating_recente rr
 INNER JOIN credito_ibba.vw_stage_exposicao_recente er ON rr.cliente_id = er.cliente_id;
 

@@ -51,7 +51,11 @@ SELECT
     ROUND(AVG(er.pct_exposicao_descoberta), 1)                  AS pct_descoberta_medio,
     ROUND(AVG(CAST(rr.score_interno AS FLOAT)), 0)              AS score_medio,
     ROUND(AVG(CAST(rr.nota_rating AS FLOAT)), 2)                AS nota_rating_media,
-    ROUND(AVG(rr.pd_12m) * 100, 3)                             AS pd_medio_pct,
+    ROUND(
+        SUM(rr.pd_12m * er.exposicao_total)
+        / NULLIF(SUM(er.exposicao_total), 0) * 100, 3
+    )                                                           AS pd_ponderado_pct,
+    ROUND(AVG(rr.pd_12m) * 100, 3)                             AS pd_medio_simples_pct,
     ROUND(AVG(lc.pct_utilizacao_limite), 1)                     AS utilizacao_media_limite
 FROM clientes c
 LEFT JOIN vw_stage_exposicao_recente  er ON c.cliente_id = er.cliente_id
