@@ -1,8 +1,8 @@
-# credito_bba
+# credito
 
 Pipeline de dados ponta a ponta para analise de portfolio de credito corporativo.
 
-Construido a partir de um case tecnico real para a posicao de Analista de Dados no Credito IBBA (Itau BBA). O repositorio cobre o fluxo completo: Excel -> Python ETL -> SQL em 3 camadas -> views analiticas -> dashboard executivo.
+Construido a partir de um case tecnico real para a posicao de Analista de Dados no Credito. O repositorio cobre o fluxo completo: Excel -> Python ETL -> SQL em 3 camadas -> views analiticas -> dashboard executivo.
 
 ---
 
