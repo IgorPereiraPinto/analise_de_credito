@@ -1,0 +1,17 @@
+// ================================================================
+// TABELAS DE APOIO - credito_bba
+// Crie cada bloco como "New Table" no Power BI Desktop
+// ================================================================
+
+dAgingVencimento =
+DATATABLE(
+    "Faixa", STRING,
+    "Ordem", INTEGER,
+    {
+        { "1-30d", 1 },
+        { "31-60d", 2 },
+        { "61-90d", 3 },
+        { "91-180d", 4 },
+        { "180d+", 5 }
+    }
+)

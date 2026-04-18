@@ -1,8 +1,8 @@
-# Credenciais e variáveis de ambiente
+# Credenciais e variaveis de ambiente
 .env
 *.env.local
 
-# Dados sensíveis e arquivos Excel com dados reais
+# Dados sensiveis e arquivos de entrada/saida
 data/raw/*.xlsx
 data/raw/*.csv
 data/raw/*.parquet
@@ -31,21 +31,26 @@ build/
 .idea/
 *.code-workspace
 
-# OS
+# Sistema operacional
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Logs e outputs temporários
+# Logs e temporarios
 *.log
 logs/
 temp/
 tmp/
 
-# Pytest — diretório de temporários local (--basetemp=.pytest_tmp)
+# Pytest e artefatos locais de validacao
 .pytest_tmp/
+pytest_tmp/
+.pytest_cache/
+pytest_cache/
+pytest_artifacts/
+pytest-cache-files-*/
 
-# Arquivos Office gerados/temporários
+# Arquivos Office temporarios
 ~$*.xlsx
 ~$*.docx
 ~$*.pptx

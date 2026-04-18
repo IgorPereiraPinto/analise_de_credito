@@ -1,21 +1,26 @@
 // ================================================================
-// MEDIDAS DAX — credito_bba
-// Portfólio de Crédito Corporativo | Crédito IBBA
+// MEDIDAS DAX - credito_bba
+// Dashboard de Credito Corporativo | layout atual do repositorio
 //
-// Organização: cada bloco indica o Display Folder no comentário.
-// Todas as medidas vão para a tabela "_Medidas".
+// Destino recomendado:
+//   tabela tecnica "_Medidas" no Power BI Desktop
 //
 // Fontes esperadas no modelo:
-//   vw_stage_cliente_enriquecido  → base principal (1 linha por cliente ativo)
-//   vw_stage_exposicao_recente    → última posição de exposição
-//   vw_stage_rating_recente       → último rating por cliente
-//   vw_stage_limite_consolidado   → limites consolidados
-//   vw_stage_operacoes_ativas     → operações ativas agregadas
-//   vw_matriz_risco               → classificação de risco por cliente
-//   vw_kpi_por_subsetor           → concentração por subsetor
-//   vw_evolucao_rating_segmento   → série histórica de rating
-//   operacoes                     → tabela de operações (detalhe)
-//   ratings                       → histórico de ratings
+//   vw_stage_cliente_enriquecido
+//   vw_stage_exposicao_recente
+//   vw_stage_rating_recente
+//   vw_stage_limite_consolidado
+//   vw_stage_operacoes_ativas
+//   vw_kpi_por_subsetor
+//   vw_matriz_risco
+//   vw_evolucao_rating_segmento
+//   operacoes
+//   ratings
+//   dCalendario
+//   dAgingVencimento (arquivo auxiliar em powerbi/dax/tabelas_suporte_dashboard.dax)
+//
+// Convencao:
+//   comentarios "PASTA:" indicam o Display Folder sugerido
 // ================================================================
 
 
@@ -23,414 +28,231 @@
 // PASTA: 0. Base
 // ================================================================
 
-// Qtd Clientes Ativos
-// Conta clientes com status Ativo na tabela principal
 Qtd Clientes Ativos =
 CALCULATE(
     DISTINCTCOUNT( vw_stage_cliente_enriquecido[cliente_id] ),
-    vw_stage_cliente_enriquecido[status_cliente] = "ATIVO"
+    vw_stage_cliente_enriquecido[status_cliente] = "Ativo"
 )
 
-// Qtd Clientes Selecionados
-// Responde ao contexto de filtro — útil em tabelas e tooltips
 Qtd Clientes Selecionados =
 DISTINCTCOUNT( vw_stage_cliente_enriquecido[cliente_id] )
 
-// Qtd Operações Ativas
 Qtd Operacoes Ativas =
 CALCULATE(
-    COUNT( operacoes[operacao_id] ),
-    operacoes[status_operacao] = "ATIVA"
+    COUNTROWS( operacoes ),
+    operacoes[status_operacao] = "Ativa"
 )
 
-// Qtd Ratings Registrados
+Qtd Operacoes Vencidas =
+CALCULATE(
+    COUNTROWS( operacoes ),
+    operacoes[status_operacao] = "Vencida"
+)
+
 Qtd Ratings Registrados =
-COUNT( ratings[cliente_id] )
-
-// Total de Registros no Período
-// Conta linhas da tabela de exposição no contexto de dCalendario
-Total Exposicoes no Periodo =
-COUNTROWS( vw_stage_exposicao_recente )
+COUNTROWS( ratings )
 
 
 // ================================================================
-// PASTA: 1. Exposição
+// PASTA: 1. Visao Geral
 // ================================================================
 
-// Exposição Total (R$)
 Exposicao Total =
-SUMX(
-    vw_stage_exposicao_recente,
-    vw_stage_exposicao_recente[exposicao_total]
-)
+SUM( vw_stage_cliente_enriquecido[exposicao_total] )
 
-// Exposição Garantida (R$)
 Exposicao Garantida =
-SUMX(
-    vw_stage_exposicao_recente,
-    vw_stage_exposicao_recente[exposicao_garantida]
-)
+SUM( vw_stage_cliente_enriquecido[exposicao_garantida] )
 
-// Exposição Descoberta (R$)
 Exposicao Descoberta =
-SUMX(
-    vw_stage_exposicao_recente,
-    vw_stage_exposicao_recente[exposicao_descoberta]
-)
+SUM( vw_stage_cliente_enriquecido[exposicao_descoberta] )
 
-// % Exposição Descoberta
-// Parcela do portfólio sem cobertura de garantia
-// Meta: < 30% | Atenção: 30-40% | Crítico: > 40%
 Pct Exposicao Descoberta =
+DIVIDE( [Exposicao Descoberta], [Exposicao Total] )
+
+Score Medio =
+ROUND( AVERAGE( vw_stage_cliente_enriquecido[score_interno] ), 0 )
+
+// PD ponderada pela exposicao de cada cliente.
+// Evita distorcao por clientes pequenos com PD elevada — metrica padrao para
+// carteiras corporativas heterogeneas. Alinhado com pd_ponderado_pct nas views SQL.
+PD Media Pct =
 DIVIDE(
-    [Exposicao Descoberta],
-    [Exposicao Total]
-)
+    SUMX(
+        vw_stage_cliente_enriquecido,
+        vw_stage_cliente_enriquecido[pd_12m] * vw_stage_cliente_enriquecido[exposicao_total]
+    ),
+    SUM( vw_stage_cliente_enriquecido[exposicao_total] )
+) * 100
 
-// Exposição Média por Cliente
-Exposicao Media por Cliente =
-DIVIDE(
-    [Exposicao Total],
-    [Qtd Clientes Ativos]
-)
+// Provisao regulatoria: taxa CMN 2.682 por faixa de rating aplicada sobre exposicao_total.
+// Metodologia diferente do HTML (PD ponderada x descoberta) — ambas documentadas.
+// Esta e a abordagem correta para contexto regulatorio / Power BI.
+Provisao Total Estimada =
+SUM( vw_stage_cliente_enriquecido[provisao_necessaria] )
 
-// Exposição Total (em MM R$) — para cards
-Exposicao Total MM =
-DIVIDE( [Exposicao Total], 1000000 )
-
-// Exposição Total (em BI R$) — para headline
 Exposicao Total BI =
 DIVIDE( [Exposicao Total], 1000000000 )
 
-// Exposição Máxima Individual
-// Maior exposição de um único cliente no contexto atual
-Exposicao Maxima Individual =
-MAXX(
-    vw_stage_exposicao_recente,
-    vw_stage_exposicao_recente[exposicao_total]
+Provisao Total MM =
+DIVIDE( [Provisao Total Estimada], 1000000 )
+
+
+// ================================================================
+// PASTA: 2. Aprof. KPIs
+// ================================================================
+
+Valor Vencido =
+CALCULATE(
+    SUM( operacoes[valor_utilizado] ),
+    operacoes[status_operacao] = "Vencida"
 )
 
-// Exposição do Cliente Mais Exposto (com nome)
-// Use em card com tooltip
-Top Cliente por Exposicao =
-VAR _maxExp =
-    MAXX( vw_stage_exposicao_recente, vw_stage_exposicao_recente[exposicao_total] )
+Pct Carteira Vencida =
+DIVIDE( [Valor Vencido], [Exposicao Total] )
+
+Utilizacao Media Pct =
+AVERAGE( vw_stage_cliente_enriquecido[pct_utilizacao_limite] )
+
+Valor Top 5 Clientes =
+VAR _baseClientes =
+    ADDCOLUMNS(
+        SUMMARIZE(
+            vw_stage_cliente_enriquecido,
+            vw_stage_cliente_enriquecido[cliente_id]
+        ),
+        "exp_cliente", CALCULATE( MAX( vw_stage_cliente_enriquecido[exposicao_total] ) )
+    )
+VAR _top5 =
+    TOPN( 5, _baseClientes, [exp_cliente], DESC )
 RETURN
-    CALCULATE(
-        SELECTEDVALUE( vw_stage_exposicao_recente[cliente_id] ),
-        vw_stage_exposicao_recente[exposicao_total] = _maxExp
+    SUMX( _top5, [exp_cliente] )
+
+Pct Top 5 Clientes =
+DIVIDE( [Valor Top 5 Clientes], [Exposicao Total] )
+
+Valor Restante Carteira =
+[Exposicao Total] - [Valor Top 5 Clientes]
+
+Utilizacao Media por Segmento Pct =
+AVERAGE( vw_stage_cliente_enriquecido[pct_utilizacao_limite] )
+
+Valor Vencido Aging =
+VAR _faixa = SELECTEDVALUE( dAgingVencimento[Faixa] )
+RETURN
+    SWITCH(
+        _faixa,
+        "1-30d",
+            CALCULATE(
+                SUM( operacoes[valor_utilizado] ),
+                operacoes[status_operacao] = "Vencida",
+                FILTER(
+                    operacoes,
+                    VAR _dias = DATEDIFF( operacoes[data_vencimento], TODAY(), DAY )
+                    RETURN _dias >= 1 && _dias <= 30
+                )
+            ),
+        "31-60d",
+            CALCULATE(
+                SUM( operacoes[valor_utilizado] ),
+                operacoes[status_operacao] = "Vencida",
+                FILTER(
+                    operacoes,
+                    VAR _dias = DATEDIFF( operacoes[data_vencimento], TODAY(), DAY )
+                    RETURN _dias >= 31 && _dias <= 60
+                )
+            ),
+        "61-90d",
+            CALCULATE(
+                SUM( operacoes[valor_utilizado] ),
+                operacoes[status_operacao] = "Vencida",
+                FILTER(
+                    operacoes,
+                    VAR _dias = DATEDIFF( operacoes[data_vencimento], TODAY(), DAY )
+                    RETURN _dias >= 61 && _dias <= 90
+                )
+            ),
+        "91-180d",
+            CALCULATE(
+                SUM( operacoes[valor_utilizado] ),
+                operacoes[status_operacao] = "Vencida",
+                FILTER(
+                    operacoes,
+                    VAR _dias = DATEDIFF( operacoes[data_vencimento], TODAY(), DAY )
+                    RETURN _dias >= 91 && _dias <= 180
+                )
+            ),
+        "180d+",
+            CALCULATE(
+                SUM( operacoes[valor_utilizado] ),
+                operacoes[status_operacao] = "Vencida",
+                FILTER(
+                    operacoes,
+                    DATEDIFF( operacoes[data_vencimento], TODAY(), DAY ) > 180
+                )
+            )
     )
 
-// % do Cliente na Carteira
-// Concentração individual — use em tabela de clientes
-Pct Cliente na Carteira =
-DIVIDE(
-    [Exposicao Total],
-    CALCULATE( [Exposicao Total], ALL( vw_stage_exposicao_recente ) )
-)
+
+// ================================================================
+// PASTA: 3. Provisao e Classificacao
+// ================================================================
+
+Exposicao por Classificacao Risco =
+[Exposicao Total]
+
+Provisao por Segmento =
+[Provisao Total Estimada]
+
+Qtd Clientes por Classificacao Risco =
+DISTINCTCOUNT( vw_stage_cliente_enriquecido[cliente_id] )
 
 
 // ================================================================
-// PASTA: 2. Ratings
+// PASTA: 4. Evolucao e Distribuicao
 // ================================================================
 
-// Score Interno Médio Simples
-Score Medio Simples =
-AVERAGE( vw_stage_rating_recente[score_interno] )
+Score Medio Historico =
+AVERAGE( vw_evolucao_rating_segmento[score_medio] )
 
-// Score Ponderado por Exposição
-// Média do score de cada cliente ponderada pelo tamanho da exposição.
-// Clientes com maior risco relativo têm peso proporcional ao capital alocado.
-// Benchmark: ≥850 Excelente | ≥800 Muito Bom | ≥750 Atenção | ≥650 Cuidado | <650 Crítico
-Score Ponderado por Exposicao =
-DIVIDE(
-    SUMX(
-        INNER JOIN(
-            vw_stage_rating_recente,
-            vw_stage_exposicao_recente,
-            vw_stage_rating_recente[cliente_id],
-            vw_stage_exposicao_recente[cliente_id]
-        ),
-        vw_stage_rating_recente[score_interno] * vw_stage_exposicao_recente[exposicao_total]
-    ),
-    [Exposicao Total]
-)
+Nota Media Historica =
+AVERAGE( vw_evolucao_rating_segmento[nota_media] )
 
-// Nota Rating Médio
-// Média da nota numérica de rating (1=C ... 17=AAA)
-Nota Rating Medio =
-AVERAGE( vw_stage_rating_recente[nota_rating] )
-
-// PD Média (%)
-// Probabilidade de default média ponderada simples
-PD Media Pct =
-AVERAGEX(
-    vw_stage_rating_recente,
-    vw_stage_rating_recente[pd_12m]
-) * 100
-
-// PD Ponderada por Exposição (%)
-// PD média ponderada pelo tamanho de cada exposição — métrica mais precisa de risco
-PD Ponderada por Exposicao Pct =
-DIVIDE(
-    SUMX(
-        INNER JOIN(
-            vw_stage_rating_recente,
-            vw_stage_exposicao_recente,
-            vw_stage_rating_recente[cliente_id],
-            vw_stage_exposicao_recente[cliente_id]
-        ),
-        vw_stage_rating_recente[pd_12m] * vw_stage_exposicao_recente[exposicao_total]
-    ),
-    [Exposicao Total]
-) * 100
-
-// Qtd Clientes Investment Grade
-// Ratings BBB- ou superior (nota >= 8)
-Qtd Clientes Investment Grade =
-CALCULATE(
-    [Qtd Clientes Selecionados],
-    vw_stage_rating_recente[nota_rating] >= 8
-)
-
-// Qtd Clientes Sub-Investment
-Qtd Clientes Sub Investment =
-CALCULATE(
-    [Qtd Clientes Selecionados],
-    vw_stage_rating_recente[nota_rating] < 8
-)
-
-// % Carteira Investment Grade (por exposição)
-Pct Carteira Investment Grade =
-DIVIDE(
+Score Medio Historico MM =
+VAR _scoreAtual = [Score Medio Historico]
+VAR _scoreAnterior =
     CALCULATE(
-        [Exposicao Total],
-        vw_stage_rating_recente[nota_rating] >= 8
-    ),
-    [Exposicao Total]
-)
-
-// Score Ponderado — Variação MoM
-// Compara o score do mês atual com o mês anterior
-Score Ponderado MoM Variacao =
-VAR _scoreAtual = [Score Ponderado por Exposicao]
-VAR _scoreMesAnterior =
-    CALCULATE(
-        [Score Ponderado por Exposicao],
+        [Score Medio Historico],
         DATEADD( dCalendario[Date], -1, MONTH )
     )
 RETURN
-    _scoreAtual - _scoreMesAnterior
+    _scoreAtual - _scoreAnterior
 
-// Clientes com Deterioração de Rating (2+ meses)
-// Detecta clientes cujo rating interno piorou em 2 meses consecutivos
-Qtd Clientes Deterioracao Rating =
-CALCULATE(
-    DISTINCTCOUNT( vw_matriz_risco[cliente_id] ),
-    vw_matriz_risco[flag_deterioracao_rating] = 1
-)
-
-
-// ================================================================
-// PASTA: 3. Limites
-// ================================================================
-
-// Limite Total Aprovado
-Limite Total =
-SUM( vw_stage_limite_consolidado[limite_total] )
-
-// Limite Utilizado
-Limite Utilizado =
-SUM( vw_stage_limite_consolidado[utilizado_total] )
-
-// % Utilização de Limite (carteira)
-// Média ponderada de utilização. Meta: 60-75% | Alerta: >85%
-Pct Utilizacao Limite =
-DIVIDE( [Limite Utilizado], [Limite Total] )
-
-// % Utilização Média Simples (por cliente)
-Pct Utilizacao Media Simples =
+Score Medio Historico Media Movel 3M =
 AVERAGEX(
-    vw_stage_limite_consolidado,
-    vw_stage_limite_consolidado[pct_utilizacao_limite] / 100
+    DATESINPERIOD( dCalendario[Date], MAX( dCalendario[Date] ), -3, MONTH ),
+    CALCULATE( [Score Medio Historico] )
 )
 
-// Qtd Clientes Acima do Alerta (>85%)
-Qtd Clientes Utilizacao Alerta =
-CALCULATE(
-    [Qtd Clientes Selecionados],
-    vw_stage_limite_consolidado[pct_utilizacao_limite] > 85
-)
+Exposicao por Segmento =
+[Exposicao Total]
 
-// Qtd Clientes em Atenção (75-85%)
-Qtd Clientes Utilizacao Atencao =
-CALCULATE(
-    [Qtd Clientes Selecionados],
-    vw_stage_limite_consolidado[pct_utilizacao_limite] > 75,
-    vw_stage_limite_consolidado[pct_utilizacao_limite] <= 85
-)
-
-// Qtd Clientes Utilizando Bem (60-75%)
-Qtd Clientes Utilizacao Ideal =
-CALCULATE(
-    [Qtd Clientes Selecionados],
-    vw_stage_limite_consolidado[pct_utilizacao_limite] >= 60,
-    vw_stage_limite_consolidado[pct_utilizacao_limite] <= 75
-)
-
-// Headroom de Crédito (espaço disponível)
-// Quanto ainda pode ser concedido dentro dos limites aprovados
-Headroom Credito =
-[Limite Total] - [Limite Utilizado]
-
-// Headroom (%)
-Headroom Pct =
-1 - [Pct Utilizacao Limite]
+Qtd Clientes por Rating =
+DISTINCTCOUNT( vw_stage_cliente_enriquecido[cliente_id] )
 
 
 // ================================================================
-// PASTA: 4. Operações
+// PASTA: 5. Concentracao
 // ================================================================
 
-// Valor Aprovado Total (operações ativas)
-Valor Aprovado Total =
-CALCULATE(
-    SUM( operacoes[valor_aprovado] ),
-    operacoes[status_operacao] = "ATIVA"
-)
-
-// Valor Utilizado Total (operações ativas)
-Valor Utilizado Total =
-CALCULATE(
-    SUM( operacoes[valor_utilizado] ),
-    operacoes[status_operacao] = "ATIVA"
-)
-
-// % Utilização de Operações
-Pct Utilizacao Operacoes =
-DIVIDE( [Valor Utilizado Total], [Valor Aprovado Total] )
-
-// Taxa de Juros Média Ponderada
-// Média ponderada da taxa de juros pelo valor aprovado de cada operação
-Taxa Media Ponderada =
-DIVIDE(
-    SUMX(
-        FILTER( operacoes, operacoes[status_operacao] = "ATIVA" ),
-        operacoes[taxa_juros] * operacoes[valor_aprovado]
-    ),
-    [Valor Aprovado Total]
-)
-
-// Prazo Médio (meses)
-Prazo Medio Meses =
-CALCULATE(
-    AVERAGE( operacoes[prazo_meses] ),
-    operacoes[status_operacao] = "ATIVA"
-)
-
-// Valor Aprovado por Produto
-// Use em gráfico de barras com filtro de produto
-Valor Aprovado por Produto =
-CALCULATE(
-    [Valor Aprovado Total],
-    ALLEXCEPT( operacoes, operacoes[produto] )
-)
-
-// Qtd Operações Vencidas
-Qtd Operacoes Vencidas =
-CALCULATE(
-    COUNT( operacoes[operacao_id] ),
-    operacoes[status_operacao] = "VENCIDA"
-)
-
-// Valor em Operações Vencidas
-Valor Operacoes Vencidas =
-CALCULATE(
-    SUM( operacoes[valor_utilizado] ),
-    operacoes[status_operacao] = "VENCIDA"
-)
-
-// % Carteira em Operações Vencidas
-Pct Carteira Vencida =
-DIVIDE( [Valor Operacoes Vencidas], [Valor Aprovado Total] )
-
-
-// ================================================================
-// PASTA: 5. Risco
-// ================================================================
-
-// Qtd Clientes ALTO RISCO
-Qtd Clientes Alto Risco =
-CALCULATE(
-    DISTINCTCOUNT( vw_matriz_risco[cliente_id] ),
-    vw_matriz_risco[classificacao_risco] = "ALTO_RISCO"
-)
-
-// Qtd Clientes ATENÇÃO
-Qtd Clientes Atencao Risco =
-CALCULATE(
-    DISTINCTCOUNT( vw_matriz_risco[cliente_id] ),
-    vw_matriz_risco[classificacao_risco] = "ATENCAO"
-)
-
-// Qtd Clientes NORMAL
-Qtd Clientes Normal Risco =
-CALCULATE(
-    DISTINCTCOUNT( vw_matriz_risco[cliente_id] ),
-    vw_matriz_risco[classificacao_risco] = "NORMAL"
-)
-
-// Exposição em ALTO RISCO
-Exposicao Alto Risco =
-CALCULATE(
-    [Exposicao Total],
-    vw_matriz_risco[classificacao_risco] = "ALTO_RISCO"
-)
-
-// % Carteira em ALTO RISCO
-Pct Carteira Alto Risco =
-DIVIDE( [Exposicao Alto Risco], [Exposicao Total] )
-
-// Qtd Flags de Risco Ativos (total de alertas disparados)
-Total Flags Risco =
-SUMX(
-    vw_matriz_risco,
-    vw_matriz_risco[flag_deterioracao_rating]
-    + vw_matriz_risco[flag_utilizacao_alta]
-    + vw_matriz_risco[flag_descoberta_alta]
-)
-
-// Score de Risco Combinado
-// Média ponderada de flags — quanto mais próximo de 3, mais crítico
-Score Risco Combinado =
-AVERAGEX(
-    vw_matriz_risco,
-    vw_matriz_risco[flag_deterioracao_rating]
-    + vw_matriz_risco[flag_utilizacao_alta]
-    + vw_matriz_risco[flag_descoberta_alta]
-)
-
-// Maior PD Individual no contexto
-PD Maxima Individual =
-MAXX(
-    vw_stage_rating_recente,
-    vw_stage_rating_recente[pd_12m]
-) * 100
-
-
-// ================================================================
-// PASTA: 6. Concentração
-// ================================================================
-
-// % Concentração do Subsetor Selecionado
-// Use em tabela ou visual com filtro de subsetor
 Pct Concentracao Subsetor =
 DIVIDE(
     [Exposicao Total],
-    CALCULATE( [Exposicao Total], ALL( vw_kpi_por_subsetor ) )
+    CALCULATE(
+        [Exposicao Total],
+        ALL( vw_stage_cliente_enriquecido[subsetor] )
+    )
 )
 
-// % Concentração do Setor Selecionado
 Pct Concentracao Setor =
 DIVIDE(
     [Exposicao Total],
@@ -440,258 +262,380 @@ DIVIDE(
     )
 )
 
-// Qtd Subsetores em Limite Regulatório (>15%)
+HHI Concentracao Carteira =
+VAR _baseClientes =
+    ADDCOLUMNS(
+        SUMMARIZE(
+            vw_stage_cliente_enriquecido,
+            vw_stage_cliente_enriquecido[cliente_id]
+        ),
+        "exp_cliente", CALCULATE( MAX( vw_stage_cliente_enriquecido[exposicao_total] ) )
+    )
+RETURN
+    SUMX(
+        _baseClientes,
+        POWER( DIVIDE( [exp_cliente], [Exposicao Total] ), 2 )
+    )
+
+Pct Top 10 Clientes =
+VAR _baseClientes =
+    ADDCOLUMNS(
+        SUMMARIZE(
+            vw_stage_cliente_enriquecido,
+            vw_stage_cliente_enriquecido[cliente_id]
+        ),
+        "exp_cliente", CALCULATE( MAX( vw_stage_cliente_enriquecido[exposicao_total] ) )
+    )
+VAR _top10 =
+    TOPN( 10, _baseClientes, [exp_cliente], DESC )
+RETURN
+    DIVIDE( SUMX( _top10, [exp_cliente] ), [Exposicao Total] )
+
 Qtd Subsetores Limite Regulatorio =
 CALCULATE(
     DISTINCTCOUNT( vw_kpi_por_subsetor[subsetor] ),
     vw_kpi_por_subsetor[status_concentracao] = "LIMITE_REGULATORIO"
 )
 
-// Qtd Subsetores em Monitoramento (10-15%)
 Qtd Subsetores Monitoramento =
 CALCULATE(
     DISTINCTCOUNT( vw_kpi_por_subsetor[subsetor] ),
     vw_kpi_por_subsetor[status_concentracao] = "MONITORAMENTO"
 )
 
-// HHI — Índice Herfindahl-Hirschman (concentração de portfólio)
-// HHI próximo de 0 = carteira diversificada | próximo de 1 = concentrada
-// Calculado como soma dos quadrados das participações individuais
-HHI Concentracao =
-SUMX(
-    SUMMARIZE(
-        vw_stage_exposicao_recente,
-        vw_stage_exposicao_recente[cliente_id],
-        "participacao", DIVIDE(
-            SUM( vw_stage_exposicao_recente[exposicao_total] ),
-            CALCULATE( SUM( vw_stage_exposicao_recente[exposicao_total] ), ALL( vw_stage_exposicao_recente ) )
-        )
-    ),
-    [participacao] ^ 2
+
+// ================================================================
+// PASTA: 6. Analise de Riscos
+// ================================================================
+
+Qtd Clientes Alto Risco =
+CALCULATE(
+    DISTINCTCOUNT( vw_matriz_risco[cliente_id] ),
+    vw_matriz_risco[classificacao_risco] = "ALTO_RISCO"
 )
 
-// Top 10 Clientes — % da Carteira
-// Mede o quanto os 10 maiores clientes representam no total
-Pct Top 10 Clientes =
-VAR _top10 =
-    TOPN(
-        10,
-        SUMMARIZE(
-            vw_stage_exposicao_recente,
-            vw_stage_exposicao_recente[cliente_id],
-            "exp", SUM( vw_stage_exposicao_recente[exposicao_total] )
-        ),
-        [exp], DESC
+Qtd Clientes Atencao Risco =
+CALCULATE(
+    DISTINCTCOUNT( vw_matriz_risco[cliente_id] ),
+    vw_matriz_risco[classificacao_risco] = "ATENCAO"
+)
+
+Qtd Clientes Normal Risco =
+CALCULATE(
+    DISTINCTCOUNT( vw_matriz_risco[cliente_id] ),
+    vw_matriz_risco[classificacao_risco] = "NORMAL"
+)
+
+Exposicao Alto Risco =
+CALCULATE(
+    SUM( vw_matriz_risco[exposicao_total] ),
+    vw_matriz_risco[classificacao_risco] = "ALTO_RISCO"
+)
+
+Pct Carteira Alto Risco =
+DIVIDE( [Exposicao Alto Risco], [Exposicao Total] )
+
+Total Flags de Risco =
+SUMX(
+    vw_matriz_risco,
+    vw_matriz_risco[flag_deterioracao_rating]
+    + vw_matriz_risco[flag_utilizacao_alta]
+    + vw_matriz_risco[flag_descoberta_alta]
+)
+
+Score de Risco Combinado =
+AVERAGEX(
+    vw_matriz_risco,
+    vw_matriz_risco[flag_deterioracao_rating]
+    + vw_matriz_risco[flag_utilizacao_alta]
+    + vw_matriz_risco[flag_descoberta_alta]
+)
+
+Qtd Clientes Deterioracao Rating =
+CALCULATE(
+    DISTINCTCOUNT( vw_matriz_risco[cliente_id] ),
+    vw_matriz_risco[flag_deterioracao_rating] = 1
+)
+
+
+// ================================================================
+// PASTA: 7. Performance de Limites
+// ================================================================
+
+Limite Total =
+SUM( vw_stage_cliente_enriquecido[limite_total] )
+
+Limite Utilizado =
+SUM( vw_stage_cliente_enriquecido[limite_utilizado] )
+
+Pct Utilizacao Limite Carteira =
+DIVIDE( [Limite Utilizado], [Limite Total] )
+
+Qtd Clientes Utilizacao acima 80 =
+CALCULATE(
+    DISTINCTCOUNT( vw_stage_cliente_enriquecido[cliente_id] ),
+    vw_stage_cliente_enriquecido[pct_utilizacao_limite] > 80
+)
+
+Qtd Clientes Utilizacao acima 85 =
+CALCULATE(
+    DISTINCTCOUNT( vw_stage_cliente_enriquecido[cliente_id] ),
+    vw_stage_cliente_enriquecido[pct_utilizacao_limite] > 85
+)
+
+Headroom Credito =
+[Limite Total] - [Limite Utilizado]
+
+Headroom Credito Pct =
+1 - [Pct Utilizacao Limite Carteira]
+
+Valor Aprovado Ativo =
+SUM( vw_stage_cliente_enriquecido[aprovado_total] )
+
+Taxa Media Carteira =
+AVERAGE( vw_stage_cliente_enriquecido[taxa_media] )
+
+Prazo Medio Operacoes Meses =
+AVERAGEX(
+    FILTER( operacoes, operacoes[status_operacao] = "Ativa" ),
+    operacoes[prazo_meses]
+)
+
+
+// ================================================================
+// PASTA: 8. Analises Adicionais
+// ================================================================
+
+P25 Score =
+PERCENTILEX.INC(
+    vw_stage_cliente_enriquecido,
+    vw_stage_cliente_enriquecido[score_interno],
+    0.25
+)
+
+P50 Score =
+PERCENTILEX.INC(
+    vw_stage_cliente_enriquecido,
+    vw_stage_cliente_enriquecido[score_interno],
+    0.50
+)
+
+P75 Score =
+PERCENTILEX.INC(
+    vw_stage_cliente_enriquecido,
+    vw_stage_cliente_enriquecido[score_interno],
+    0.75
+)
+
+P95 Score =
+PERCENTILEX.INC(
+    vw_stage_cliente_enriquecido,
+    vw_stage_cliente_enriquecido[score_interno],
+    0.95
+)
+
+Volatilidade Score Mensal =
+VAR _serie =
+    ADDCOLUMNS(
+        VALUES( vw_evolucao_rating_segmento[ano_mes] ),
+        "score_mes", CALCULATE( [Score Medio Historico] )
     )
 RETURN
-    DIVIDE(
-        SUMX( _top10, [exp] ),
-        CALCULATE( [Exposicao Total], ALL( vw_stage_exposicao_recente ) )
-    )
+    STDEVX.S( _serie, [score_mes] )
 
 
 // ================================================================
-// PASTA: 7. Tempo
+// PASTA: 9. Tempo
 // ================================================================
 
-// Exposição Total — Mês Anterior
 Exposicao Total Mes Anterior =
 CALCULATE(
     [Exposicao Total],
     DATEADD( dCalendario[Date], -1, MONTH )
 )
 
-// Variação MoM — Exposição (R$)
 Exposicao Variacao MoM =
 [Exposicao Total] - [Exposicao Total Mes Anterior]
 
-// Variação MoM — Exposição (%)
 Exposicao Variacao MoM Pct =
-DIVIDE(
-    [Exposicao Variacao MoM],
-    [Exposicao Total Mes Anterior]
-)
+DIVIDE( [Exposicao Variacao MoM], [Exposicao Total Mes Anterior] )
 
-// Exposição Total — Mesmo Período Ano Anterior
 Exposicao Total SPLY =
 CALCULATE(
     [Exposicao Total],
     SAMEPERIODLASTYEAR( dCalendario[Date] )
 )
 
-// Variação YoY — Exposição (%)
 Exposicao Variacao YoY Pct =
-DIVIDE(
-    [Exposicao Total] - [Exposicao Total SPLY],
-    [Exposicao Total SPLY]
-)
+DIVIDE( [Exposicao Total] - [Exposicao Total SPLY], [Exposicao Total SPLY] )
 
-// Exposição YTD
 Exposicao YTD =
 CALCULATE(
     [Exposicao Total],
     DATESYTD( dCalendario[Date] )
 )
 
-// Score Ponderado — Média Móvel 3 Meses
-// Suaviza variações pontuais no score da carteira
-Score Ponderado Media Movel 3M =
-AVERAGEX(
-    DATESINPERIOD( dCalendario[Date], LASTDATE( dCalendario[Date] ), -3, MONTH ),
-    [Score Ponderado por Exposicao]
+PD Media Mes Anterior Pct =
+CALCULATE(
+    [PD Media Pct],
+    DATEADD( dCalendario[Date], -1, MONTH )
 )
 
-// Evolução de Rating — Variação MoM por Segmento
-// Use em visual de tabela com segmento no contexto
-Rating Nota Variacao MoM =
-VAR _notaAtual = AVERAGE( vw_evolucao_rating_segmento[nota_media] )
-VAR _notaAnterior =
-    CALCULATE(
-        AVERAGE( vw_evolucao_rating_segmento[nota_media] ),
-        DATEADD( dCalendario[Date], -1, MONTH )
-    )
-RETURN
-    _notaAtual - _notaAnterior
-
-// PD — Variação MoM (pp)
 PD Variacao MoM pp =
-[PD Media Pct]
-- CALCULATE( [PD Media Pct], DATEADD( dCalendario[Date], -1, MONTH ) )
+[PD Media Pct] - [PD Media Mes Anterior Pct]
 
 
 // ================================================================
-// PASTA: 8. KPI Status
+// PASTA: 10. Status KPI
 // ================================================================
-// Retornam texto para uso em formatação condicional por regras de campo.
-// Use em colunas calculadas ou como medidas em cards com ícones.
 
-// Status Score Ponderado
-Status Score Ponderado =
-VAR _score = [Score Ponderado por Exposicao]
-RETURN
-    SWITCH(
-        TRUE(),
-        _score >= 850, "EXCELENTE",
-        _score >= 800, "MUITO BOM",
-        _score >= 750, "ATENÇÃO",
-        _score >= 650, "CUIDADO",
-        "CRÍTICO"
-    )
-
-// Cor Score Ponderado (para formatação condicional por valor)
-Cor Score Ponderado =
-VAR _score = [Score Ponderado por Exposicao]
-RETURN
-    SWITCH(
-        TRUE(),
-        _score >= 800, "#1a7c3e",    -- verde
-        _score >= 750, "#f0b429",    -- amarelo
-        _score >= 650, "#e07b00",    -- laranja
-        "#c0392b"                    -- vermelho
-    )
-
-// Status % Exposição Descoberta
 Status Exposicao Descoberta =
 VAR _pct = [Pct Exposicao Descoberta]
 RETURN
     SWITCH(
         TRUE(),
         _pct < 0.30, "META",
-        _pct < 0.40, "ATENÇÃO",
-        "CRÍTICO"
+        _pct < 0.40, "ATENCAO",
+        "CRITICO"
     )
 
-// Cor % Exposição Descoberta
 Cor Exposicao Descoberta =
 VAR _pct = [Pct Exposicao Descoberta]
 RETURN
     SWITCH(
         TRUE(),
-        _pct < 0.30, "#1a7c3e",
-        _pct < 0.40, "#f0b429",
-        "#c0392b"
+        _pct < 0.30, "#1A7F4B",
+        _pct < 0.40, "#B45309",
+        "#C0392B"
     )
 
-// Status % Utilização de Limite
-Status Utilizacao Limite =
-VAR _pct = [Pct Utilizacao Limite]
+Status Score Medio =
+VAR _score = [Score Medio]
+RETURN
+    SWITCH(
+        TRUE(),
+        _score >= 850, "EXCELENTE",
+        _score >= 800, "MUITO_BOM",
+        _score >= 750, "ATENCAO",
+        _score >= 650, "CUIDADO",
+        "CRITICO"
+    )
+
+Cor Score Medio =
+VAR _score = [Score Medio]
+RETURN
+    SWITCH(
+        TRUE(),
+        _score >= 800, "#1A7F4B",
+        _score >= 750, "#B45309",
+        _score >= 650, "#EC7000",
+        "#C0392B"
+    )
+
+Status PD Media =
+VAR _pd = [PD Media Pct]
+RETURN
+    SWITCH(
+        TRUE(),
+        _pd < 1, "META",
+        _pd < 3, "ATENCAO",
+        "CRITICO"
+    )
+
+Cor PD Media =
+VAR _pd = [PD Media Pct]
+RETURN
+    SWITCH(
+        TRUE(),
+        _pd < 1, "#1A7F4B",
+        _pd < 3, "#B45309",
+        "#C0392B"
+    )
+
+Status Utilizacao Media =
+VAR _pct = DIVIDE( [Utilizacao Media Pct], 100 )
 RETURN
     SWITCH(
         TRUE(),
         _pct >= 0.60 && _pct <= 0.75, "IDEAL",
         _pct > 0.85, "ALERTA",
-        _pct > 0.75, "ATENÇÃO",
-        _pct < 0.40, "SUBUTILIZADO",
+        _pct > 0.75, "ATENCAO",
         "MONITORAR"
     )
 
-// Cor % Utilização de Limite
-Cor Utilizacao Limite =
-VAR _pct = [Pct Utilizacao Limite]
+Cor Utilizacao Media =
+VAR _pct = DIVIDE( [Utilizacao Media Pct], 100 )
 RETURN
     SWITCH(
         TRUE(),
-        _pct >= 0.60 && _pct <= 0.75, "#1a7c3e",
-        _pct > 0.85, "#c0392b",
-        _pct > 0.75, "#f0b429",
-        "#808080"
+        _pct >= 0.60 && _pct <= 0.75, "#1A7F4B",
+        _pct > 0.85, "#C0392B",
+        _pct > 0.75, "#B45309",
+        "#6B7280"
     )
 
-// Status Concentração Subsetor
-Status Concentracao Subsetor =
-VAR _pct = [Pct Concentracao Subsetor]
+Status Carteira Vencida =
+VAR _pct = [Pct Carteira Vencida]
 RETURN
     SWITCH(
         TRUE(),
-        _pct > 0.15, "LIMITE REGULATÓRIO",
-        _pct > 0.10, "MONITORAMENTO",
-        "OK"
+        _pct = 0, "CONTROLE",
+        _pct <= 0.01, "ATENCAO",
+        "CRITICO"
     )
 
-// Cor Concentração Subsetor
-Cor Concentracao Subsetor =
-VAR _pct = [Pct Concentracao Subsetor]
+Cor Carteira Vencida =
+VAR _pct = [Pct Carteira Vencida]
 RETURN
     SWITCH(
         TRUE(),
-        _pct > 0.15, "#c0392b",
-        _pct > 0.10, "#f0b429",
-        "#1a7c3e"
+        _pct = 0, "#1A7F4B",
+        _pct <= 0.01, "#B45309",
+        "#C0392B"
     )
 
-// Ícone Score Ponderado (Unicode para uso em título de card)
-Icone Score Ponderado =
-VAR _score = [Score Ponderado por Exposicao]
+Status Top 5 Clientes =
+VAR _pct = [Pct Top 5 Clientes]
 RETURN
     SWITCH(
         TRUE(),
-        _score >= 800, "✅ " & FORMAT( _score, "0" ),
-        _score >= 750, "⚠️ " & FORMAT( _score, "0" ),
-        "🚨 " & FORMAT( _score, "0" )
+        _pct <= 0.35, "PULVERIZADO",
+        _pct <= 0.45, "MONITORAR",
+        "CONCENTRADO"
     )
 
-// Label Variação MoM — Exposição
+Cor Top 5 Clientes =
+VAR _pct = [Pct Top 5 Clientes]
+RETURN
+    SWITCH(
+        TRUE(),
+        _pct <= 0.35, "#1A7F4B",
+        _pct <= 0.45, "#B45309",
+        "#C0392B"
+    )
+
 Label Exposicao MoM =
 VAR _var = [Exposicao Variacao MoM Pct]
 RETURN
     IF(
         ISBLANK( _var ),
-        "—",
-        IF( _var >= 0,
+        "-",
+        IF(
+            _var >= 0,
             "▲ " & FORMAT( _var, "0.0%" ),
-            "▼ " & FORMAT( ABS(_var), "0.0%")
+            "▼ " & FORMAT( ABS( _var ), "0.0%" )
         )
     )
 
-// Label Variação MoM — PD
 Label PD MoM =
 VAR _var = [PD Variacao MoM pp]
 RETURN
     IF(
         ISBLANK( _var ),
-        "—",
-        IF( _var <= 0,
-            "▼ " & FORMAT( ABS(_var), "0.000" ) & "pp (melhora)",
-            "▲ " & FORMAT( _var, "0.000" ) & "pp (piora)"
+        "-",
+        IF(
+            _var <= 0,
+            "▼ " & FORMAT( ABS( _var ), "0.00" ) & "pp",
+            "▲ " & FORMAT( _var, "0.00" ) & "pp"
         )
     )
