@@ -12,17 +12,13 @@
       --orange-soft:#FFF6ED;
       --navy:#0D1B2A;
       --navy-mid:#1C3450;
-      --navy-lt:#2A4A6B;
       --gray-1:#F5F6F8;
       --gray-2:#E8EAED;
-      --gray-3:#BFC3CA;
       --gray-4:#6B7280;
       --gray-5:#374151;
       --gray-6:#1F2937;
       --white:#FFFFFF;
       --green:#1A7F4B;
-      --green-bg:#E8F5EE;
-      --blue-bg:#EBF4FF;
       --radius:10px;
       --shadow:0 1px 4px rgba(0,0,0,.06),0 10px 22px rgba(13,27,42,.05);
       --shadow-strong:0 4px 14px rgba(13,27,42,.10),0 14px 34px rgba(13,27,42,.08);
@@ -77,156 +73,92 @@
     .tab{
       padding:12px 14px;color:#B8C5D4;font-size:12px;font-weight:600;
       border-bottom:2px solid transparent;white-space:nowrap;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center
+      text-decoration:none;display:inline-flex;align-items:center;cursor:pointer;
+      background:none;border:none;font-family:inherit
     }
     .tab.active{color:#F5A04A;border-bottom-color:var(--orange);background:rgba(255,255,255,.02)}
+    .content{padding:0 16px 16px}
+    .landing-panel{display:none}
+    .landing-panel.active{display:block}
     .hero{
       background:var(--white);
-      margin:0 16px;
-      padding:24px 24px 20px;
+      padding:24px;
       border:1px solid var(--gray-2);
       border-top:none;
       border-radius:0 0 12px 12px;
       box-shadow:var(--shadow);
+      margin-bottom:16px;
     }
-    .hero-grid{
-      display:grid;
-      grid-template-columns:1.2fr .8fr;
-      gap:18px;
-      align-items:stretch;
-    }
+    .hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
     .hero-card,.panel,.cta-card{
       background:linear-gradient(180deg,#FFFFFF 0%,#FCFCFD 100%);
       border:1px solid rgba(13,27,42,.04);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
     }
-    .hero-card{
-      padding:28px 28px 24px;
-      position:relative;
-      overflow:hidden;
-    }
+    .hero-card{padding:28px;position:relative;overflow:hidden}
     .hero-card::before{
-      content:'';
-      position:absolute;
-      top:0;right:0;
-      width:120px;height:120px;
-      border-radius:50%;
-      background:rgba(236,112,0,.06);
-      transform:translate(35px,-30px);
+      content:'';position:absolute;top:0;right:0;width:120px;height:120px;border-radius:50%;
+      background:rgba(236,112,0,.06);transform:translate(35px,-30px)
     }
     .eyebrow{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:4px 10px;
-      border-radius:999px;
-      background:var(--orange-bg);
-      color:var(--orange);
-      border:1px solid rgba(236,112,0,.18);
-      font-size:10px;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.4px;
-      margin-bottom:14px;
+      display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;
+      background:var(--orange-bg);color:var(--orange);border:1px solid rgba(236,112,0,.18);
+      font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;margin-bottom:14px
     }
-    h1{
-      color:var(--navy);
-      font-size:34px;
-      line-height:1.1;
-      letter-spacing:-1px;
-      margin-bottom:12px;
-    }
-    .hero-text{
-      font-size:14px;
-      line-height:1.7;
-      color:var(--gray-4);
-      max-width:660px;
-      margin-bottom:18px;
-    }
+    h1{color:var(--navy);font-size:34px;line-height:1.1;letter-spacing:-1px;margin-bottom:12px}
+    .hero-text{font-size:14px;line-height:1.7;color:var(--gray-4);max-width:660px;margin-bottom:18px}
     .hero-actions{display:flex;gap:10px;flex-wrap:wrap}
     .btn{
       display:inline-flex;align-items:center;gap:8px;text-decoration:none;
       padding:11px 16px;border-radius:999px;font-size:12px;font-weight:800;
       transition:transform .15s ease,box-shadow .15s ease
     }
-    .btn-primary{
-      background:var(--navy);color:var(--white);border:1px solid var(--navy);
-      box-shadow:var(--shadow)
-    }
-    .btn-secondary{
-      background:var(--orange-soft);color:var(--orange);border:1px solid rgba(236,112,0,.18)
-    }
+    .btn-secondary{background:var(--orange-soft);color:var(--orange);border:1px solid rgba(236,112,0,.18)}
     .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-strong)}
     .side-stack{display:grid;gap:12px}
     .panel{padding:18px}
-    .panel-title{
-      font-size:11px;font-weight:800;color:var(--gray-4);text-transform:uppercase;
-      letter-spacing:.7px;margin-bottom:10px
-    }
+    .panel-title{font-size:11px;font-weight:800;color:var(--gray-4);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
     .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-    .kpi{
-      border:1px solid var(--gray-2);
-      background:var(--gray-1);
-      border-radius:10px;
-      padding:14px 12px;
-    }
+    .kpi{border:1px solid var(--gray-2);background:var(--gray-1);border-radius:10px;padding:14px 12px}
     .kpi-value{font-size:22px;font-weight:800;color:var(--gray-6);line-height:1;margin-bottom:5px}
     .kpi-label{font-size:11px;color:var(--gray-4)}
     .list{display:grid;gap:10px}
-    .list-item{
-      display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--gray-2)
-    }
+    .list-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--gray-2)}
     .list-item:last-child{border-bottom:none;padding-bottom:0}
-    .dot{
-      width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0
-    }
+    .dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
     .dot.orange{background:var(--orange)}
     .dot.green{background:var(--green)}
-    .dot.navy{background:var(--navy-mid)}
+    .dot.navy{background:var(--navy)}
     .li-title{font-size:12px;font-weight:700;color:var(--gray-6);margin-bottom:3px}
     .li-sub{font-size:11px;line-height:1.55;color:var(--gray-4)}
-    .content{padding:16px}
+    .section-card{
+      background:var(--white);
+      border:1px solid var(--gray-2);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
     .section-title{
       font-size:11px;font-weight:800;color:var(--gray-4);text-transform:uppercase;
-      letter-spacing:.8px;margin:16px 0 10px;display:flex;align-items:center;gap:8px
+      letter-spacing:.8px;margin:0 0 10px;display:flex;align-items:center;gap:8px
     }
     .section-title::after{content:'';flex:1;height:1px;background:var(--gray-2)}
-    .cards{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-    }
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
     .cta-card{padding:18px}
     .card-title{font-size:13px;font-weight:700;color:var(--gray-6);margin-bottom:8px}
     .card-text{font-size:12px;line-height:1.6;color:var(--gray-4)}
     .card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
     .tag{
-      display:inline-flex;
-      padding:4px 8px;
-      border-radius:999px;
-      font-size:10px;
-      font-weight:700;
-      background:var(--gray-1);
-      color:var(--gray-4);
-      border:1px solid var(--gray-2);
+      display:inline-flex;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:700;
+      background:var(--gray-1);color:var(--gray-4);border:1px solid var(--gray-2)
     }
     .note{
-      margin:0 16px 16px;
-      padding:14px 16px;
-      background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);
-      border-radius:12px;
-      color:#D4DEE8;
-      font-size:11px;
-      line-height:1.65;
-      box-shadow:0 8px 18px rgba(13,27,42,.18);
+      margin-top:16px;padding:14px 16px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);
+      border-radius:12px;color:#D4DEE8;font-size:11px;line-height:1.65;box-shadow:0 8px 18px rgba(13,27,42,.18)
     }
     .note strong{color:#FFD1A0}
-    @media(max-width:1100px){
-      .hero-grid,.cards,.kpi-grid{grid-template-columns:1fr}
-    }
+    @media(max-width:1100px){.hero-grid,.cards,.kpi-grid{grid-template-columns:1fr}}
     @media(max-width:900px){
       .header{height:auto;padding:12px 16px;align-items:flex-start;gap:12px;flex-direction:column}
       .header-right{flex-wrap:wrap}
@@ -259,109 +191,121 @@
       </div>
     </div>
     <div class="header-right">
-      <span class="badge-ref">Repositorio: credito_bba</span>
+      <span class="badge-ref">Repositorio: credito</span>
       <span class="header-date">Publicado no GitHub Pages</span>
     </div>
   </div>
 
   <div class="tabs-shell">
     <div class="tabs-bar">
-      <a class="tab active" href="#visao-projeto">Visao do Projeto</a>
-      <a class="tab" href="#pipeline">Pipeline</a>
-      <a class="tab" href="#entregas">Entregas</a>
+      <button class="tab active" type="button" data-target="visao" onclick="switchLandingTab('visao')">Visao do Projeto</button>
+      <button class="tab" type="button" data-target="pipeline" onclick="switchLandingTab('pipeline')">Pipeline</button>
+      <button class="tab" type="button" data-target="entregas" onclick="switchLandingTab('entregas')">Entregas</button>
       <a class="tab" href="dashboards/dashboard_credito_bba.html">Dashboard</a>
+      <a class="tab" href="https://github.com/IgorPereiraPinto/credito" target="_blank" rel="noopener">Repositorio</a>
     </div>
   </div>
 
-  <section class="hero" id="visao-projeto">
-    <div class="hero-grid">
-      <div class="hero-card">
-        <div class="eyebrow">Case tecnico · credito corporativo</div>
-        <h1>Da base Excel ao dashboard executivo</h1>
-        <p class="hero-text">
-          Projeto ponta a ponta para analise de portfolio de credito corporativo, com Python ETL,
-          modelagem SQL em 3 camadas, dualidade SQL Server e Athena, pacote DAX para Power BI e
-          dashboard interativo em HTML.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="dashboards/dashboard_credito_bba.html">Abrir dashboard</a>
-          <a class="btn btn-secondary" href="https://github.com/IgorPereiraPinto/credito_bba" target="_blank" rel="noopener">Ver repositorio</a>
-        </div>
-      </div>
-
-      <div class="side-stack">
-        <div class="panel">
-          <div class="panel-title">Resumo rapido</div>
-          <div class="kpi-grid">
-            <div class="kpi"><div class="kpi-value">5</div><div class="kpi-label">tabelas de origem</div></div>
-            <div class="kpi"><div class="kpi-value">4</div><div class="kpi-label">scripts ETL</div></div>
-            <div class="kpi"><div class="kpi-value">3</div><div class="kpi-label">camadas SQL</div></div>
-            <div class="kpi"><div class="kpi-value">43</div><div class="kpi-label">testes automatizados</div></div>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="panel-title">Diferenciais</div>
-          <div class="list">
-            <div class="list-item">
-              <div class="dot orange"></div>
-              <div><div class="li-title">Dualidade SQL Server e Athena</div><div class="li-sub">Mesmo projeto com implementacao local e stack alvo em AWS.</div></div>
-            </div>
-            <div class="list-item">
-              <div class="dot green"></div>
-              <div><div class="li-title">Roadmap didatico</div><div class="li-sub">Trilha em 14 etapas para estudo, portfolio e reutilizacao.</div></div>
-            </div>
-            <div class="list-item">
-              <div class="dot navy"></div>
-              <div><div class="li-title">Camada DAX incluida</div><div class="li-sub">Medidas e tabelas de apoio alinhadas ao layout atual do dashboard.</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <main class="content">
-    <div class="section-title" id="pipeline">Arquitetura</div>
-    <div class="cards">
-      <div class="cta-card">
-        <div class="card-title">Extracao e qualidade</div>
-        <div class="card-text">Leitura do Excel, validacao de schema, limpeza, padronizacao e exportacao para consumo analitico.</div>
-        <div class="card-tags"><span class="tag">Python</span><span class="tag">pandas</span><span class="tag">pytest</span></div>
-      </div>
-      <div class="cta-card">
-        <div class="card-title">Modelagem analitica</div>
-        <div class="card-text">Estrutura em `raw`, `stage` e `dw`, com views de KPI, matriz de risco e evolucao temporal.</div>
-        <div class="card-tags"><span class="tag">SQL Server</span><span class="tag">Athena</span><span class="tag">DW</span></div>
-      </div>
-      <div class="cta-card">
-        <div class="card-title">Consumo executivo</div>
-        <div class="card-text">Dashboard HTML com filtros e periodos, documentacao de negocio e pacote DAX para Power BI.</div>
-        <div class="card-tags"><span class="tag">HTML</span><span class="tag">Chart.js</span><span class="tag">DAX</span></div>
-      </div>
-    </div>
+    <section class="landing-panel active" id="panel-visao">
+      <section class="hero">
+        <div class="hero-grid">
+          <div class="hero-card">
+            <div class="eyebrow">Case tecnico · credito corporativo</div>
+            <h1>Da base Excel ao dashboard executivo</h1>
+            <p class="hero-text">
+              Projeto ponta a ponta para analise de portfolio de credito corporativo, com Python ETL,
+              modelagem SQL em 3 camadas, dualidade SQL Server e Athena, pacote DAX para Power BI e
+              dashboard interativo em HTML.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-secondary" href="dashboards/dashboard_credito_bba.html">Ir para o dashboard</a>
+            </div>
+          </div>
+          <div class="side-stack">
+            <div class="panel">
+              <div class="panel-title">Resumo rapido</div>
+              <div class="kpi-grid">
+                <div class="kpi"><div class="kpi-value">5</div><div class="kpi-label">tabelas de origem</div></div>
+                <div class="kpi"><div class="kpi-value">4</div><div class="kpi-label">scripts ETL</div></div>
+                <div class="kpi"><div class="kpi-value">3</div><div class="kpi-label">camadas SQL</div></div>
+                <div class="kpi"><div class="kpi-value">43</div><div class="kpi-label">testes automatizados</div></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="panel-title">Diferenciais</div>
+              <div class="list">
+                <div class="list-item"><div class="dot orange"></div><div><div class="li-title">Dualidade SQL Server e Athena</div><div class="li-sub">Mesmo projeto com implementacao local e stack alvo em AWS.</div></div></div>
+                <div class="list-item"><div class="dot green"></div><div><div class="li-title">Roadmap didatico</div><div class="li-sub">Trilha em 14 etapas para estudo, portfolio e reutilizacao.</div></div></div>
+                <div class="list-item"><div class="dot navy"></div><div><div class="li-title">Camada DAX incluida</div><div class="li-sub">Medidas e tabelas de apoio alinhadas ao layout atual do dashboard.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
 
-    <div class="section-title" id="entregas">Acesso rapido</div>
-    <div class="cards">
-      <div class="cta-card">
-        <div class="card-title">Dashboard interativo</div>
-        <div class="card-text">Acesse a versao executiva com `Visao Geral`, aprofundamento de KPIs, riscos, limites e analises adicionais.</div>
-        <div class="card-tags"><span class="tag">visuais</span><span class="tag">filtros</span><span class="tag">periodos</span></div>
+    <section class="landing-panel" id="panel-pipeline">
+      <div class="section-card">
+        <div class="section-title">Arquitetura</div>
+        <div class="cards">
+          <div class="cta-card">
+            <div class="card-title">Extracao e qualidade</div>
+            <div class="card-text">Leitura do Excel, validacao de schema, limpeza, padronizacao e exportacao para consumo analitico.</div>
+            <div class="card-tags"><span class="tag">Python</span><span class="tag">pandas</span><span class="tag">pytest</span></div>
+          </div>
+          <div class="cta-card">
+            <div class="card-title">Modelagem analitica</div>
+            <div class="card-text">Estrutura em `raw`, `stage` e `dw`, com views de KPI, matriz de risco e evolucao temporal.</div>
+            <div class="card-tags"><span class="tag">SQL Server</span><span class="tag">Athena</span><span class="tag">DW</span></div>
+          </div>
+          <div class="cta-card">
+            <div class="card-title">Consumo executivo</div>
+            <div class="card-text">Dashboard HTML com filtros e periodos, documentacao de negocio e pacote DAX para Power BI.</div>
+            <div class="card-tags"><span class="tag">HTML</span><span class="tag">Chart.js</span><span class="tag">DAX</span></div>
+          </div>
+        </div>
       </div>
-      <div class="cta-card">
-        <div class="card-title">Repositorio didatico</div>
-        <div class="card-text">Organizado para estudo e reaproveitamento, com documentacao de arquitetura, regras de negocio e roadmap.</div>
-        <div class="card-tags"><span class="tag">docs</span><span class="tag">roadmap</span><span class="tag">portfolio</span></div>
+    </section>
+
+    <section class="landing-panel" id="panel-entregas">
+      <div class="section-card">
+        <div class="section-title">Acesso rapido</div>
+        <div class="cards">
+          <div class="cta-card">
+            <div class="card-title">Dashboard interativo</div>
+            <div class="card-text">Acesse a versao executiva com `Visao Geral`, aprofundamento de KPIs, riscos, limites e analises adicionais.</div>
+            <div class="card-tags"><span class="tag">visuais</span><span class="tag">filtros</span><span class="tag">periodos</span></div>
+          </div>
+          <div class="cta-card">
+            <div class="card-title">Repositorio didatico</div>
+            <div class="card-text">Organizado para estudo e reaproveitamento, com documentacao de arquitetura, regras de negocio e roadmap.</div>
+            <div class="card-tags"><span class="tag">docs</span><span class="tag">roadmap</span><span class="tag">portfolio</span></div>
+          </div>
+          <div class="cta-card">
+            <div class="card-title">Camada BI pronta</div>
+            <div class="card-text">Medidas DAX e tabelas auxiliares para reproduzir os principais indicadores tambem no Power BI.</div>
+            <div class="card-tags"><span class="tag">power bi</span><span class="tag">medidas</span><span class="tag">kpis</span></div>
+          </div>
+        </div>
       </div>
-      <div class="cta-card">
-        <div class="card-title">Camada BI pronta</div>
-        <div class="card-text">Medidas DAX e tabelas auxiliares para reproduzir os principais indicadores tambem no Power BI.</div>
-        <div class="card-tags"><span class="tag">power bi</span><span class="tag">medidas</span><span class="tag">kpis</span></div>
-      </div>
+    </section>
+
+    <div class="note">
+      <strong>Nota:</strong> esta pagina inicial segue o mesmo padrao visual do dashboard do projeto e usa abas reais para navegar entre Visao do Projeto, Pipeline e Entregas.
     </div>
   </main>
 
-  <div class="note">
-    <strong>Nota:</strong> esta pagina inicial agora segue o mesmo padrao visual do dashboard do projeto e funciona como porta de entrada para o case publicado no GitHub Pages.
-  </div>
+  <script>
+    function switchLandingTab(tab){
+      document.querySelectorAll('.landing-panel').forEach(panel => panel.classList.remove('active'));
+      const targetPanel = document.getElementById('panel-' + tab);
+      if(targetPanel) targetPanel.classList.add('active');
+
+      document.querySelectorAll('.tabs-bar .tab[data-target]').forEach(item => {
+        item.classList.toggle('active', item.dataset.target === tab);
+      });
+    }
+  </script>
 </body>
 </html>
