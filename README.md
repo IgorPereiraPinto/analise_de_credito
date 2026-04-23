@@ -1,4 +1,4 @@
-# Analise de Credito
+# Analise de Crédito
 
 Pipeline de dados ponta a ponta para analise de portfolio de credito corporativo, construido como case tecnico com foco em 3 objetivos: ser didatico, funcional e reutilizavel.
 
