@@ -1,4 +1,4 @@
-# credito
+# Análise de Crédito
 
 Pipeline de dados ponta a ponta para analise de portfolio de credito corporativo.
 
